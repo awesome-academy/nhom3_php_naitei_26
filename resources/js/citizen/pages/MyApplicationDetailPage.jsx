@@ -13,6 +13,7 @@ import DocumentUploader from '../components/DocumentUploader';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
+import { statusDescription, statusLabel, transitionDescription } from '../utils/applicationStatus';
 import { formatBytes, formatDateTime } from '../utils/format';
 import { normalizeDocumentRequirements } from '../utils/schema';
 
@@ -276,7 +277,8 @@ export default function MyApplicationDetailPage() {
                         </div>
                         <div className="rounded-2xl border-[1.5px] border-gray-100 bg-gray-50 p-6">
                             <h3 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">Trạng thái</h3>
-                            <p className="mt-1 text-lg font-bold text-gray-900">{application.status}</p>
+                            <p className="mt-1 text-lg font-bold text-gray-900">{statusLabel(application.status)}</p>
+                            <p className="mt-1 text-sm leading-6 text-gray-500">{statusDescription(application.status)}</p>
                         </div>
                     </div>
 
@@ -314,27 +316,39 @@ export default function MyApplicationDetailPage() {
                         </div>
                     )}
 
-                    {timeline.length > 0 && (
-                        <section className="mt-8">
-                            <h2 className="mb-4 text-[18px] font-bold text-gray-900">Tiến độ xử lý</h2>
+                    <section className="mt-8">
+                        <h2 className="mb-4 text-[18px] font-bold text-gray-900">Tiến độ xử lý</h2>
+                        {timeline.length > 0 ? (
                             <ol className="relative border-l border-gray-200 pl-6">
-                                {timeline.map((entry, idx) => (
-                                    <li key={`${entry.from_status}-${entry.to_status}-${idx}`} className="mb-4">
-                                        <div className="absolute -left-[5px] mt-1 h-2.5 w-2.5 rounded-full bg-primary"></div>
-                                        <p className="text-sm font-semibold text-gray-900">
-                                            {entry.from_status ? `${entry.from_status} → ${entry.to_status}` : entry.to_status}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {entry.changed_by_name ? `bởi ${entry.changed_by_name}` : ''} {entry.created_at ? `· ${formatDateTime(entry.created_at)}` : ''}
-                                        </p>
-                                        {entry.note && (
-                                            <p className="mt-1 text-sm text-gray-600 whitespace-pre-wrap">{entry.note}</p>
-                                        )}
-                                    </li>
-                                ))}
+                                {timeline.map((entry, idx) => {
+                                    const fromLabel = entry.from_status_label ?? statusLabel(entry.from_status);
+                                    const toLabel = entry.to_status_label ?? entry.label ?? statusLabel(entry.to_status);
+
+                                    return (
+                                        <li key={`${entry.from_status}-${entry.to_status}-${entry.created_at}-${idx}`} className="mb-5 last:mb-0">
+                                            <div className="absolute -left-[5px] mt-1 h-2.5 w-2.5 rounded-full bg-primary"></div>
+                                            <p className="text-sm font-semibold text-gray-900">
+                                                {entry.from_status ? `${fromLabel} → ${toLabel}` : toLabel}
+                                            </p>
+                                            <p className="mt-1 text-sm leading-6 text-gray-600">
+                                                {transitionDescription(entry)}
+                                            </p>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                {entry.changed_by_name ? `bởi ${entry.changed_by_name}` : 'Hệ thống'} {entry.created_at ? `· ${formatDateTime(entry.created_at)}` : ''}
+                                            </p>
+                                            {entry.note && (
+                                                <p className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700 whitespace-pre-wrap">{entry.note}</p>
+                                            )}
+                                        </li>
+                                    );
+                                })}
                             </ol>
-                        </section>
-                    )}
+                        ) : (
+                            <p className="rounded-xl border border-gray-100 bg-gray-50 p-5 text-sm text-gray-600">
+                                Hồ sơ đã được tạo. Tiến độ xử lý sẽ được cập nhật khi cán bộ tiếp nhận hoặc thay đổi trạng thái.
+                            </p>
+                        )}
+                    </section>
 
                     {application.status === 'approved' && (
                         <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4">

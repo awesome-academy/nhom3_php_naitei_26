@@ -40,7 +40,8 @@ class CitizenSpaTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertViewIs('citizen.app');
+            ->assertViewIs('citizen.app')
+            ->assertSee('id="citizen-app"', false);
     }
 
     public function test_citizen_auth_routes_render_the_same_spa(): void

@@ -5,6 +5,7 @@ namespace App\Http\Resources\Api\V1;
 use App\Enums\ApplicationStatus;
 use App\Models\ApplicationDocument;
 use App\Models\User;
+use App\Support\Application\ApplicationStatusPresenter;
 use App\Support\ServiceSchema;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -72,7 +73,16 @@ class ApplicationResource extends JsonResource
                     ->sortBy(fn ($history) => [$history->created_at?->timestamp ?? 0, $history->getKey()])
                     ->map(fn ($history) => [
                         'from_status' => $history->from_status?->value,
+                        'from_status_label' => $history->from_status === null
+                            ? null
+                            : ApplicationStatusPresenter::label($history->from_status),
                         'to_status' => $history->to_status->value,
+                        'to_status_label' => ApplicationStatusPresenter::label($history->to_status),
+                        'label' => ApplicationStatusPresenter::label($history->to_status),
+                        'description' => ApplicationStatusPresenter::transitionDescription(
+                            $history->from_status,
+                            $history->to_status
+                        ),
                         'changed_by_name' => $history->changedBy?->name,
                         'note' => $history->note,
                         'created_at' => $history->created_at?->toISOString(),

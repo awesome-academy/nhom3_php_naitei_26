@@ -1,6 +1,68 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+
+import {
+    forgetCitizenSession,
+    getRememberedCitizen,
+    logoutCitizen,
+    rememberCitizenSession,
+} from '../api/auth';
+import { fetchCitizenProfile } from '../api/profile';
 
 export default function Header() {
+    const { pathname } = useLocation();
+    const [citizen, setCitizen] = useState(() => getRememberedCitizen());
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    const navItems = [
+        { to: '/', label: 'Home', active: pathname === '/' },
+        { to: '/services', label: 'All Services', active: pathname.startsWith('/services') },
+        { to: '/applications', label: 'Track Application', active: pathname.startsWith('/applications') },
+    ];
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function syncCitizen() {
+            try {
+                const response = await fetchCitizenProfile();
+
+                if (!isMounted) {
+                    return;
+                }
+
+                rememberCitizenSession(response.data);
+                setCitizen(response.data);
+            } catch {
+                if (!isMounted) {
+                    return;
+                }
+
+                forgetCitizenSession();
+                setCitizen(null);
+            }
+        }
+
+        syncCitizen();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    async function handleLogout() {
+        setIsLoggingOut(true);
+
+        try {
+            await logoutCitizen();
+        } finally {
+            forgetCitizenSession();
+            setCitizen(null);
+            setIsLoggingOut(false);
+            window.location.assign('/login');
+        }
+    }
+
     return (
         <header className="bg-white border-b border-gray-200 px-10 flex h-20 items-center justify-between shrink-0">
             <Link to="/" className="flex items-center gap-4">
@@ -13,12 +75,40 @@ export default function Header() {
                 </div>
             </Link>
             <nav className="hidden md:flex items-center gap-2">
-                <Link to="/" className="px-5 py-2.5 text-[16px] font-semibold text-gray-500 hover:bg-gray-100 rounded-xl transition">Home</Link>
-                <Link to="/services" className="px-5 py-2.5 text-[16px] font-semibold text-white bg-blue-600 rounded-xl transition">All Services</Link>
-                <Link to="/applications" className="px-5 py-2.5 text-[16px] font-semibold text-gray-500 hover:bg-gray-100 rounded-xl transition">Track Application</Link>
+                {navItems.map((item) => (
+                    <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`px-5 py-2.5 text-[16px] font-semibold rounded-xl transition ${
+                            item.active ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'
+                        }`}
+                    >
+                        {item.label}
+                    </Link>
+                ))}
             </nav>
-            <div>
-                <Link to="/login" className="px-7 py-3 text-[17px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">Login</Link>
+            <div className="flex items-center gap-3">
+                {citizen ? (
+                    <>
+                        <Link className="hidden text-right sm:block" to="/profile">
+                            <span className="block max-w-40 truncate text-sm font-semibold text-gray-900">{citizen.name}</span>
+                            <span className="block max-w-40 truncate text-xs text-gray-500">{citizen.email}</span>
+                        </Link>
+                        <Link className="px-5 py-2.5 text-[15px] font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition" to="/profile">
+                            Hồ sơ
+                        </Link>
+                        <button
+                            className="px-5 py-2.5 text-[15px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition disabled:opacity-60"
+                            disabled={isLoggingOut}
+                            onClick={handleLogout}
+                            type="button"
+                        >
+                            {isLoggingOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                        </button>
+                    </>
+                ) : (
+                    <Link to="/login" className="px-7 py-3 text-[17px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">Đăng nhập</Link>
+                )}
             </div>
         </header>
     );
