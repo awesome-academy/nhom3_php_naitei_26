@@ -86,16 +86,18 @@
                     </a>
                 @endcan
 
-                <a
-                    href="{{ route('admin.users.import') }}"
-                    @class([
-                        'whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
-                        'bg-white/20 text-white' => request()->routeIs('admin.users.import*'),
-                        'text-white/65 hover:bg-white/10 hover:text-white' => ! request()->routeIs('admin.users.import*'),
-                    ])
-                >
-                    Nhập CSV
-                </a>
+                @if (auth()->user()?->isSuperAdmin())
+                    <a
+                        href="{{ route('admin.users.import') }}"
+                        @class([
+                            'whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                            'bg-white/20 text-white' => request()->routeIs('admin.users.import*'),
+                            'text-white/65 hover:bg-white/10 hover:text-white' => ! request()->routeIs('admin.users.import*'),
+                        ])
+                    >
+                        Nhập CSV
+                    </a>
+                @endif
 
                 @if (auth()->user()?->isSuperAdmin())
                     <a

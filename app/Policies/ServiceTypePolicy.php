@@ -36,6 +36,11 @@ class ServiceTypePolicy
         return $this->authorizeSuperAdminMutation($user);
     }
 
+    public function restore(User $user, ServiceType $serviceType): Response
+    {
+        return $this->authorizeSuperAdminMutation($user);
+    }
+
     private function canView(User $user): bool
     {
         if (! $user->canAccessProtectedResources()) {

@@ -36,6 +36,11 @@ class ServiceCategoryPolicy
         return $this->authorizeSuperAdminMutation($user);
     }
 
+    public function restore(User $user, ServiceCategory $serviceCategory): Response
+    {
+        return $this->authorizeSuperAdminMutation($user);
+    }
+
     private function canView(User $user): bool
     {
         if (! $user->canAccessProtectedResources()) {

@@ -29,7 +29,7 @@ class ServiceType extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(ServiceCategory::class, 'category_id');
+        return $this->belongsTo(ServiceCategory::class, 'category_id')->withTrashed();
     }
 
     public function responsibleDepartment(): BelongsTo
@@ -51,6 +51,21 @@ class ServiceType extends Model
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
+    }
+
+    public function isActive(): bool
+    {
+        return ! $this->trashed() && $this->is_active;
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->trashed();
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        return parent::resolveRouteBindingQuery($query, $value, $field)->withTrashed();
     }
 
     /**

@@ -9,9 +9,11 @@
             <p class="mt-1 text-sm text-gray-600">Tra cứu cơ cấu phòng ban, lãnh đạo, thành viên và dịch vụ trong phạm vi được phép.</p>
         </div>
         <div class="flex items-center gap-3">
-            <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => 'departments'], request()->query()))">
-                Xuất CSV
-            </x-admin.button>
+            @if (auth()->user()?->isSuperAdmin())
+                <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => 'departments'], request()->query()))">
+                    Xuất CSV
+                </x-admin.button>
+            @endif
             @can('create', \App\Models\Department::class)
                 <x-admin.button :href="route('admin.departments.create')">Tạo phòng ban</x-admin.button>
             @endcan
@@ -144,47 +146,28 @@
                                 <td class="whitespace-nowrap">
                                     <div class="flex justify-end gap-2">
                                         <x-admin.button variant="ghost" :href="route('admin.departments.show', $department)">Chi tiết</x-admin.button>
-                                        @can('update', $department)
-                                            <x-admin.button variant="secondary" :href="route('admin.departments.edit', $department)">Sửa</x-admin.button>
-                                        @endcan
-                                        @can('archive', $department)
-                                            <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-department-{{ $department->id }}">Xóa</x-admin.button>
-                                        @endcan
+                                        @if ($department->isActive())
+                                            @can('update', $department)
+                                                <x-admin.button variant="secondary" :href="route('admin.departments.edit', $department)">Sửa</x-admin.button>
+                                            @endcan
+                                            @can('archive', $department)
+                                                <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-department-{{ $department->id }}">Lưu trữ</x-admin.button>
+                                            @endcan
+                                        @else
+                                            @can('restore', $department)
+                                                <x-admin.button variant="secondary" class="!text-primary" data-dialog-open="restore-department-{{ $department->id }}">Hoàn tác</x-admin.button>
+                                            @endcan
+                                        @endif
                                     </div>
-                                    @can('archive', $department)
-                                        <x-admin.dialog
-                                            id="archive-department-{{ $department->id }}"
-                                            title="Lưu trữ phòng ban"
-                                            description="Phòng ban sẽ bị loại khỏi danh sách hoạt động và các lựa chọn quan hệ mới. Thành viên, lãnh đạo, dịch vụ và lịch sử nghiệp vụ vẫn được giữ nguyên."
-                                            data-open-on-error="{{ $errors->hasAny(['confirmation', 'version']) && (string) old('archive_department_id') === (string) $department->id ? 'true' : 'false' }}"
-                                        >
-                                            <form method="POST" action="{{ route('admin.departments.destroy', $department) }}" class="space-y-4">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="archive_department_id" value="{{ $department->id }}">
-                                                <input type="hidden" name="confirmation" value="archive">
-                                                <input type="hidden" name="version" value="{{ $department->lock_version }}">
-                                                <p class="text-sm text-gray-700">
-                                                    Bạn có chắc muốn lưu trữ <strong>{{ $department->name }}</strong>? Đây không phải thao tác xóa vĩnh viễn.
-                                                </p>
-                                                @error('confirmation')<p class="admin-field-error">{{ $message }}</p>@enderror
-                                                @error('version')<p class="admin-field-error">{{ $message }}</p>@enderror
-                                                <div class="flex justify-end gap-2 border-t border-border pt-4">
-                                                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
-                                                    <x-admin.button type="submit" variant="danger">Xác nhận lưu trữ</x-admin.button>
-                                                </div>
-                                            </form>
-                                        </x-admin.dialog>
-                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-            <div class="px-4 py-4 sm:px-5">
-                <p class="mb-3 text-sm text-gray-600">
-                    Hiển thị {{ number_format($departments->firstItem()) }}–{{ number_format($departments->lastItem()) }} trong {{ number_format($departments->total()) }} kết quả
+            <div class="border-t border-border px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-sm text-gray-600">
+                    Hiển thị {{ number_format($departments->firstItem() ?? 0) }}–{{ number_format($departments->lastItem() ?? 0) }} trong {{ number_format($departments->total()) }} kết quả
                 </p>
                 @if ($departments->hasPages())
                     {{ $departments->onEachSide(1)->links() }}
@@ -192,4 +175,53 @@
             </div>
         @endif
     </section>
+
+    @foreach ($departments as $department)
+        @if ($department->isActive())
+            @can('archive', $department)
+                <x-admin.dialog
+                    id="archive-department-{{ $department->id }}"
+                    title="Lưu trữ phòng ban"
+                    description="Phòng ban sẽ bị loại khỏi danh sách hoạt động và các lựa chọn quan hệ mới. Thành viên, lãnh đạo, dịch vụ và lịch sử nghiệp vụ vẫn được giữ nguyên."
+                    data-open-on-error="{{ $errors->hasAny(['confirmation', 'version']) && (string) old('archive_department_id') === (string) $department->id ? 'true' : 'false' }}"
+                >
+                    <form method="POST" action="{{ route('admin.departments.destroy', $department) }}" class="space-y-4">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="archive_department_id" value="{{ $department->id }}">
+                        <input type="hidden" name="confirmation" value="archive">
+                        <input type="hidden" name="version" value="{{ $department->lock_version }}">
+                        <p class="text-sm text-gray-700">
+                            Bạn có chắc muốn lưu trữ <strong>{{ $department->name }}</strong>? Đây không phải thao tác xóa vĩnh viễn.
+                        </p>
+                        @error('confirmation')<p class="admin-field-error">{{ $message }}</p>@enderror
+                        @error('version')<p class="admin-field-error">{{ $message }}</p>@enderror
+                        <div class="flex justify-end gap-2 border-t border-border pt-4">
+                            <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                            <x-admin.button type="submit" variant="danger">Xác nhận lưu trữ</x-admin.button>
+                        </div>
+                    </form>
+                </x-admin.dialog>
+            @endcan
+        @else
+            @can('restore', $department)
+                <x-admin.dialog
+                    id="restore-department-{{ $department->id }}"
+                    title="Khôi phục phòng ban"
+                    description="Phòng ban sẽ được chuyển về trạng thái đang hoạt động và xuất hiện lại trong các danh sách chọn."
+                >
+                    <form method="POST" action="{{ route('admin.departments.restore', $department) }}" class="space-y-4">
+                        @csrf
+                        <p class="text-sm text-gray-700">
+                            Bạn có chắc chắn muốn khôi phục hoạt động cho phòng ban <strong>{{ $department->name }}</strong>?
+                        </p>
+                        <div class="flex justify-end gap-2 border-t border-border pt-4">
+                            <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                            <x-admin.button type="submit">Xác nhận hoàn tác</x-admin.button>
+                        </div>
+                    </form>
+                </x-admin.dialog>
+            @endcan
+        @endif
+    @endforeach
 @endsection

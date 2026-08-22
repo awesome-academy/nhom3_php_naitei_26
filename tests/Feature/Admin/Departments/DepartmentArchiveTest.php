@@ -159,6 +159,17 @@ class DepartmentArchiveTest extends TestCase
         $this->assertSame(2, $department->fresh()->lock_version);
     }
 
+    public function test_super_admin_can_restore_archived_department(): void
+    {
+        $actor = $this->superAdmin();
+        $department = Department::factory()->archived()->create(['code' => 'RESTORE-ME']);
+
+        $response = $this->actingAs($actor)->post(route('admin.departments.restore', $department));
+
+        $response->assertRedirect(route('admin.departments.index'));
+        $this->assertFalse($department->fresh()->trashed());
+    }
+
     private function applicationAssignment(
         Department $department,
         ServiceType $service,

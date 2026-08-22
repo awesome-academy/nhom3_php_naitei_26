@@ -21,14 +21,35 @@ class ServiceCategoryController extends Controller
 
         /** @var User $actor */
         $actor = $request->user();
-        $categories = ServiceCategory::query()
-            ->withCount('serviceTypes')
+        $status = $request->input('status', 'active');
+        $search = $request->input('search');
+
+        $query = ServiceCategory::withTrashed();
+
+        if ($status === 'active') {
+            $query->whereNull('deleted_at');
+        } elseif ($status === 'archived') {
+            $query->whereNotNull('deleted_at');
+        }
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', '%'.$search.'%')
+                    ->orWhere('code', 'ilike', '%'.$search.'%')
+                    ->orWhere('description', 'ilike', '%'.$search.'%');
+            });
+        }
+
+        $categories = $query
+            ->withCount(['serviceTypes' => fn ($q) => $q->withTrashed()])
             ->orderBy('code')
             ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.service-categories.index', compact('categories'));
+        $hasFilters = $request->filled('search') || $status !== 'active';
+
+        return view('admin.service-categories.index', compact('categories', 'status', 'search', 'hasFilters'));
     }
 
     public function create(): View
@@ -42,7 +63,7 @@ class ServiceCategoryController extends Controller
     {
         $this->authorize('view', $serviceCategory);
 
-        $serviceCategory->load('serviceTypes');
+        $serviceCategory->load(['serviceTypes' => fn ($q) => $q->withTrashed()]);
 
         return view('admin.service-categories.show', compact('serviceCategory'));
     }
@@ -90,14 +111,21 @@ class ServiceCategoryController extends Controller
     {
         $this->authorize('delete', $serviceCategory);
 
-        if ($serviceCategory->serviceTypes()->exists()) {
-            return back()->with('error', 'Không thể xóa danh mục đang có dịch vụ liên kết.');
-        }
-
         $serviceCategory->delete();
 
         return redirect()
-            ->route('admin.service-categories.index')
-            ->with('success', 'Đã xóa danh mục dịch vụ.');
+            ->back(fallback: route('admin.service-categories.index'))
+            ->with('success', 'Đã lưu trữ danh mục dịch vụ thành công.');
+    }
+
+    public function restore(Request $request, ServiceCategory $serviceCategory): RedirectResponse
+    {
+        $this->authorize('restore', $serviceCategory);
+
+        $serviceCategory->restore();
+
+        return redirect()
+            ->back(fallback: route('admin.service-categories.index'))
+            ->with('success', 'Đã hoàn tác và khôi phục danh mục dịch vụ thành công.');
     }
 }

@@ -31,6 +31,24 @@ class DataExportTest extends TestCase
         $response->assertForbidden();
     }
 
+    public function test_staff_cannot_export_data(): void
+    {
+        $staff = User::factory()->withRole(UserRole::Staff)->create();
+
+        $response = $this->actingAs($staff)->get('/admin/export/citizens');
+
+        $response->assertForbidden();
+    }
+
+    public function test_manager_cannot_export_data(): void
+    {
+        $manager = User::factory()->withRole(UserRole::Manager)->create();
+
+        $response = $this->actingAs($manager)->get('/admin/export/citizens');
+
+        $response->assertForbidden();
+    }
+
     public function test_admin_can_export_citizens_csv(): void
     {
         $admin = User::factory()->withRole(UserRole::SuperAdmin)->create();

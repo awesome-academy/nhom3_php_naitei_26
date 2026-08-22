@@ -10,19 +10,38 @@
             </a>
             <div class="mt-2 flex flex-wrap items-center gap-3">
                 <h1 class="text-2xl font-bold text-gray-950">{{ $serviceType->name }}</h1>
-                <x-admin.badge :variant="$serviceType->is_active ? 'success' : 'neutral'">
-                    {{ $serviceType->is_active ? 'Hoạt động' : 'Tạm ngưng' }}
-                </x-admin.badge>
+                @if($serviceType->isArchived())
+                    <x-admin.badge variant="neutral">Đã lưu trữ</x-admin.badge>
+                @elseif($serviceType->is_active)
+                    <x-admin.badge variant="success">Hoạt động</x-admin.badge>
+                @else
+                    <x-admin.badge variant="warning">Tạm ngưng</x-admin.badge>
+                @endif
             </div>
             <p class="mt-1 font-mono text-sm font-semibold text-primary">{{ $serviceType->code }}</p>
         </div>
 
         <div class="flex flex-wrap gap-2">
-            @can('update', $serviceType)
-                <x-admin.button variant="secondary" :href="route('admin.service-types.edit', $serviceType)">Chỉnh sửa</x-admin.button>
-            @endcan
+            @if (!$serviceType->isArchived())
+                @can('update', $serviceType)
+                    <x-admin.button variant="secondary" :href="route('admin.service-types.edit', $serviceType)">Chỉnh sửa</x-admin.button>
+                @endcan
+                @can('delete', $serviceType)
+                    <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-service">Lưu trữ</x-admin.button>
+                @endcan
+            @else
+                @can('restore', $serviceType)
+                    <x-admin.button variant="secondary" class="!text-primary" data-dialog-open="restore-service">Hoàn tác</x-admin.button>
+                @endcan
+            @endif
         </div>
     </div>
+
+    @if ($serviceType->isArchived())
+        <div class="mb-5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700" role="status">
+            Dịch vụ này đã được lưu trữ và ẩn khỏi danh sách nộp hồ sơ công dân. Toàn bộ hồ sơ cũ liên quan vẫn được lưu giữ nguyên vẹn.
+        </div>
+    @endif
 
     <div class="grid gap-5 xl:grid-cols-3">
         <div class="xl:col-span-2 space-y-5">
@@ -37,9 +56,13 @@
                         <div>
                             <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">Danh mục</dt>
                             <dd class="mt-1 text-sm text-gray-900">
-                                <a href="{{ route('admin.service-categories.show', $serviceType->category_id) }}" class="text-primary hover:underline">
-                                    {{ $serviceType->category->name }}
-                                </a>
+                                @if($serviceType->category)
+                                    <a href="{{ route('admin.service-categories.show', $serviceType->category_id) }}" class="text-primary hover:underline">
+                                        {{ $serviceType->category->name }}
+                                    </a>
+                                @else
+                                    <span class="text-gray-500">Chưa gán danh mục</span>
+                                @endif
                             </dd>
                         </div>
                         <div>
@@ -134,4 +157,43 @@
             </section>
         </div>
     </div>
+
+    @can('delete', $serviceType)
+        <x-admin.dialog
+            id="archive-service"
+            title="Lưu trữ dịch vụ công"
+            description="Dịch vụ sẽ bị ẩn khỏi danh sách cho công dân nộp hồ sơ mới. Toàn bộ hồ sơ cũ liên quan vẫn được bảo toàn."
+        >
+            <form method="POST" action="{{ route('admin.service-types.destroy', $serviceType) }}" class="space-y-4">
+                @csrf
+                @method('DELETE')
+                <p class="text-sm text-gray-700">
+                    Bạn có chắc chắn muốn lưu trữ dịch vụ <strong>{{ $serviceType->name }}</strong>? Đây không phải thao tác xóa vĩnh viễn.
+                </p>
+                <div class="flex justify-end gap-2 border-t border-border pt-4">
+                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                    <x-admin.button type="submit" variant="danger">Xác nhận lưu trữ</x-admin.button>
+                </div>
+            </form>
+        </x-admin.dialog>
+    @endcan
+
+    @can('restore', $serviceType)
+        <x-admin.dialog
+            id="restore-service"
+            title="Khôi phục dịch vụ công"
+            description="Dịch vụ sẽ được khôi phục về trạng thái hoạt động."
+        >
+            <form method="POST" action="{{ route('admin.service-types.restore', $serviceType) }}" class="space-y-4">
+                @csrf
+                <p class="text-sm text-gray-700">
+                    Bạn có chắc chắn muốn khôi phục dịch vụ <strong>{{ $serviceType->name }}</strong>?
+                </p>
+                <div class="flex justify-end gap-2 border-t border-border pt-4">
+                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                    <x-admin.button type="submit">Xác nhận hoàn tác</x-admin.button>
+                </div>
+            </form>
+        </x-admin.dialog>
+    @endcan
 @endsection

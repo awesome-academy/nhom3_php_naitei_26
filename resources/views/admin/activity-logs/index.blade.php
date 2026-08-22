@@ -149,11 +149,14 @@
                 </table>
             </div>
 
-            @if ($activityLogs->hasPages())
-                <div class="border-t border-border px-4 py-4 sm:px-5">
+            <div class="border-t border-border px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-sm text-gray-600">
+                    Hiển thị {{ number_format($activityLogs->firstItem() ?? 0) }}–{{ number_format($activityLogs->lastItem() ?? 0) }} trong {{ number_format($activityLogs->total()) }} kết quả
+                </p>
+                @if ($activityLogs->hasPages())
                     {{ $activityLogs->onEachSide(1)->links() }}
-                </div>
-            @endif
+                @endif
+            </div>
         @endif
     </section>
 
