@@ -9,6 +9,17 @@
 <body class="min-h-screen bg-surface px-4 py-8 text-gray-900 sm:px-6 lg:px-8">
     <main class="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center">
         <section class="card-container rounded-lg p-6 shadow-sm sm:p-8">
+            <div class="mb-6 flex items-center gap-4">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </span>
+                <div>
+                    <p class="text-base font-bold leading-tight text-gray-950">GovServices</p>
+                    <p class="text-xs font-medium leading-tight text-gray-500">Internal Portal</p>
+                </div>
+            </div>
             <p class="text-sm font-semibold uppercase text-primary">Khu vực nội bộ</p>
             <h1 class="mt-2 text-2xl font-bold text-gray-950">Đăng nhập nội bộ</h1>
             <p class="mt-2 text-sm leading-6 text-gray-600">

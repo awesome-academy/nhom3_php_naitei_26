@@ -8,13 +8,20 @@
 </head>
 <body class="min-h-screen bg-admin-page font-inter text-slate-900">
     <header class="bg-primary text-white shadow-sm">
-        <div class="mx-auto flex min-h-16 max-w-7xl items-center gap-1 px-2 sm:gap-5 sm:px-6 lg:px-8">
-            <a href="{{ route('admin.dashboard') }}" class="shrink-0 text-sm font-bold tracking-tight text-white">
-                <span class="sm:hidden">PSMS</span>
-                <span class="hidden sm:inline">{{ config('app.name') }}</span>
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-2 py-2 sm:gap-x-5 sm:px-6 lg:px-8">
+            <a href="{{ route('admin.dashboard') }}" class="flex shrink-0 items-center gap-3 text-white">
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary shadow-sm">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </span>
+                <span class="hidden leading-tight sm:block">
+                    <span class="block text-base font-bold tracking-tight text-white">GovServices</span>
+                    <span class="block text-xs font-medium text-white/70">Internal Portal</span>
+                </span>
             </a>
 
-            <nav class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="Điều hướng quản trị">
+            <nav class="order-3 flex w-full min-w-0 flex-wrap items-center gap-1 md:order-none md:w-auto md:flex-1" aria-label="Điều hướng quản trị">
                 <a
                     href="{{ route('admin.dashboard') }}"
                     @class([
@@ -99,7 +106,7 @@
                         'text-white/65 hover:bg-white/10 hover:text-white' => ! request()->routeIs('admin.users.import*'),
                     ])
                 >
-                    Nhập dữ liệu CSV
+                    Nhập CSV
                 </a>
 
                 @if (auth()->user()?->isSuperAdmin())

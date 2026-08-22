@@ -148,6 +148,7 @@
 - [x] T046 Run `php artisan test --env=testing --filter=CitizenNotificationTest`
 - [x] T047 Run `php artisan test --env=testing --filter=ActivityLogTest`
 - [ ] T048 Run full validation: `php artisan test --env=testing`, `composer run lint`, `npm run lint`, and `npm run build`
+- [x] T049 Add real-time Citizen notification stream and application refresh behavior
 
 ---
 

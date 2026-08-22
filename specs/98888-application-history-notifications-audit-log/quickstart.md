@@ -30,8 +30,9 @@ Expected result: the citizen sees only their own application's history and canno
 2. Log in as the affected citizen.
 3. Open the notification list or header notification menu.
 4. Mark one notification as read, then mark all as read.
+5. Keep the citizen page open while an internal user changes the application status.
 
-Expected result: unread count updates correctly and all notification messages are Vietnamese.
+Expected result: unread count updates in real time, application pages refresh after relevant workflow updates, and all notification messages are Vietnamese.
 
 ### 3. Admin Activity Log
 

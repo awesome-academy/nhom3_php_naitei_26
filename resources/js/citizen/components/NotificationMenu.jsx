@@ -11,33 +11,64 @@ import { formatDateTime } from '../utils/format';
 export default function NotificationMenu({ enabled = false }) {
     const navigate = useNavigate();
     const menuRef = useRef(null);
+    const notificationFingerprintRef = useRef('');
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
 
-    async function loadNotifications() {
+    async function loadNotifications({ notifyPages = false, showLoading = true } = {}) {
         if (!enabled) {
             return;
         }
 
-        setIsLoading(true);
+        if (showLoading) {
+            setIsLoading(true);
+        }
 
         try {
             const response = await fetchNotifications();
+            const payload = response.data;
+            const nextNotifications = payload.notifications ?? [];
+            const latestNotification = nextNotifications[0] ?? null;
+            const fingerprint = `${payload.unread_count ?? 0}|${latestNotification?.id ?? ''}|${latestNotification?.read_at ?? ''}`;
+            const shouldNotifyPage = notifyPages
+                && notificationFingerprintRef.current !== ''
+                && notificationFingerprintRef.current !== fingerprint;
 
-            setNotifications(response.data.notifications ?? []);
-            setUnreadCount(response.data.unread_count ?? 0);
+            setNotifications(nextNotifications);
+            setUnreadCount(payload.unread_count ?? 0);
+            notificationFingerprintRef.current = fingerprint;
+
+            if (shouldNotifyPage) {
+                window.dispatchEvent(new CustomEvent('citizen-notifications:updated', { detail: payload }));
+            }
         } catch {
             setNotifications([]);
             setUnreadCount(0);
         } finally {
-            setIsLoading(false);
+            if (showLoading) {
+                setIsLoading(false);
+            }
         }
     }
 
     useEffect(() => {
         loadNotifications();
+    }, [enabled]);
+
+    useEffect(() => {
+        if (!enabled) {
+            return undefined;
+        }
+
+        const interval = window.setInterval(() => {
+            loadNotifications({ notifyPages: true, showLoading: false });
+        }, 5000);
+
+        return () => {
+            window.clearInterval(interval);
+        };
     }, [enabled]);
 
     useEffect(() => {

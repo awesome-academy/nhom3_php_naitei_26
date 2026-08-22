@@ -86,6 +86,12 @@ Authenticated Citizen users.
 }
 ```
 
+## Near Real-Time Refresh
+
+- Citizen UI refreshes notification state by polling `GET /api/v1/notifications`.
+- When the latest notification or unread count changes, the Citizen application list/detail pages refresh their application data.
+- This avoids long-lived local development requests while still keeping citizen pages current after workflow updates.
+
 ## Error Cases
 
 - Unauthenticated request returns `401`.

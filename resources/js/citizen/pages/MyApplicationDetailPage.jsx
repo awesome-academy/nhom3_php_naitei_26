@@ -127,6 +127,25 @@ export default function MyApplicationDetailPage() {
     }, [application?.status, id]);
 
     useEffect(() => {
+        function refreshApplication(event) {
+            const notifications = event.detail?.notifications ?? [];
+            const hasCurrentApplicationUpdate = notifications.some((notification) => (
+                String(notification.application_id) === String(id)
+            ));
+
+            if (hasCurrentApplicationUpdate) {
+                loadApplication();
+            }
+        }
+
+        window.addEventListener('citizen-notifications:updated', refreshApplication);
+
+        return () => {
+            window.removeEventListener('citizen-notifications:updated', refreshApplication);
+        };
+    }, [id]);
+
+    useEffect(() => {
         if (!flash) {
             return undefined;
         }

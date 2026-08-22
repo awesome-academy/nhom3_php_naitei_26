@@ -76,6 +76,18 @@ export default function MyApplicationsPage() {
     const currentPage = meta?.current_page ?? 1;
     const lastPage = meta?.last_page ?? 1;
 
+    useEffect(() => {
+        function refreshApplications() {
+            loadApplications(currentPage);
+        }
+
+        window.addEventListener('citizen-notifications:updated', refreshApplications);
+
+        return () => {
+            window.removeEventListener('citizen-notifications:updated', refreshApplications);
+        };
+    }, [currentPage]);
+
     return (
         <main className="min-h-screen bg-surface flex flex-col font-sans">
             <Header />
