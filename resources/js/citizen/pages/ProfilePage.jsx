@@ -6,6 +6,7 @@ import { fetchCitizenProfile, updateCitizenProfile } from '../api/profile';
 import Footer from '../components/Footer';
 import FormField, { FieldError } from '../components/FormField';
 import Header from '../components/Header';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const initialForm = {
     name: '',
@@ -17,6 +18,7 @@ const initialForm = {
 
 export default function ProfilePage() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [profile, setProfile] = useState(null);
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
@@ -50,7 +52,7 @@ export default function ProfilePage() {
                 navigate('/login', {
                     replace: true,
                     state: {
-                        flash: 'Vui lòng đăng nhập để xem hồ sơ.',
+                        flash: t('profile.loginRequired'),
                     },
                 });
             } finally {
@@ -97,7 +99,7 @@ export default function ProfilePage() {
             const response = await updateCitizenProfile(form);
 
             setProfile(response.data);
-            setFlash('Cập nhật hồ sơ thành công.');
+            setFlash(t('profile.updated'));
         } catch (error) {
             const apiError = getApiError(error);
             setMessage(apiError.message);
@@ -112,7 +114,7 @@ export default function ProfilePage() {
             <main className="min-h-screen bg-surface flex flex-col text-gray-900">
                 <Header />
                 <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex items-center justify-center">
-                    <p className="rounded-lg border border-border bg-white px-5 py-4 text-sm font-semibold text-gray-600">Đang tải hồ sơ...</p>
+                    <p className="rounded-lg border border-border bg-white px-5 py-4 text-sm font-semibold text-gray-600">{t('profile.loading')}</p>
                 </div>
                 <Footer />
             </main>
@@ -126,28 +128,28 @@ export default function ProfilePage() {
             <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex flex-col">
                 <section className="px-10 py-8">
                     <div className="mb-6">
-                        <p className="text-sm font-semibold uppercase text-primary">Hồ sơ công dân</p>
-                        <h1 className="mt-2 text-[26px] font-bold tracking-tight text-gray-900">Thông tin tài khoản</h1>
+                        <p className="text-sm font-semibold uppercase text-primary">{t('profile.citizenProfile')}</p>
+                        <h1 className="mt-2 text-[26px] font-bold tracking-tight text-gray-900">{t('profile.accountInformation')}</h1>
                     </div>
 
                     <div className="grid items-start gap-6 lg:grid-cols-[280px_1fr]">
                         <aside className="rounded-lg border border-border bg-blue-50 p-5">
-                            <p className="text-sm font-semibold uppercase text-primary">Hồ sơ công dân</p>
+                            <p className="text-sm font-semibold uppercase text-primary">{t('profile.citizenProfile')}</p>
                             <h1 className="mt-3 text-2xl font-bold leading-tight text-gray-950">
-                                Thông tin tài khoản
+                                {t('profile.accountInformation')}
                             </h1>
                             <dl className="mt-5 space-y-4 text-sm">
                                 <div>
-                                    <dt className="font-semibold text-gray-500">Email</dt>
+                                    <dt className="font-semibold text-gray-500">{t('auth.email')}</dt>
                                     <dd className="mt-1 break-all text-gray-950">{profile.email}</dd>
                                 </div>
                                 <div>
-                                    <dt className="font-semibold text-gray-500">Số CCCD</dt>
+                                    <dt className="font-semibold text-gray-500">{t('auth.citizenId')}</dt>
                                     <dd className="mt-1 text-gray-950">{profile.citizen_id}</dd>
                                 </div>
                                 <div>
-                                    <dt className="font-semibold text-gray-500">Vai trò</dt>
-                                    <dd className="mt-1 text-gray-950">Công dân</dd>
+                                    <dt className="font-semibold text-gray-500">{t('profile.role')}</dt>
+                                    <dd className="mt-1 text-gray-950">{t('profile.citizen')}</dd>
                                 </div>
                             </dl>
                         </aside>
@@ -157,14 +159,14 @@ export default function ProfilePage() {
                                 <FormField
                                     autoComplete="name"
                                     errors={errors.name}
-                                    label="Họ và tên"
+                                    label={t('auth.fullName')}
                                     name="name"
                                     onChange={updateField}
                                     value={form.name}
                                 />
                                 <FormField
                                     errors={errors.date_of_birth}
-                                    label="Ngày sinh"
+                                    label={t('auth.dateOfBirth')}
                                     name="date_of_birth"
                                     onChange={updateField}
                                     type="date"
@@ -173,14 +175,14 @@ export default function ProfilePage() {
                                 <FormField
                                     autoComplete="tel"
                                     errors={errors.phone}
-                                    label="Số điện thoại"
+                                    label={t('auth.phone')}
                                     name="phone"
                                     onChange={updateField}
                                     value={form.phone}
                                 />
                                 <div className="md:col-span-2">
                                     <label className="label mb-1.5 normal-case tracking-normal" htmlFor="address">
-                                        Địa chỉ
+                                        {t('auth.address')}
                                     </label>
                                     <textarea
                                         className={`input-field min-h-24 resize-y rounded-lg px-3.5 py-2.5 text-sm ${
@@ -205,10 +207,10 @@ export default function ProfilePage() {
                                         />
                                         <span>
                                             <span className="block text-sm font-semibold text-gray-900">
-                                                Nhận thông báo qua email
+                                                {t('profile.emailNotifications')}
                                             </span>
                                             <span className="mt-1 block text-sm leading-5 text-gray-600">
-                                                Gửi thêm email khi hồ sơ cần bổ sung, được duyệt hoặc bị từ chối.
+                                                {t('profile.emailNotificationsHelp')}
                                             </span>
                                         </span>
                                     </label>
@@ -230,10 +232,10 @@ export default function ProfilePage() {
 
                             <div className="mt-6 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="text-sm text-gray-600">
-                                    Email, CCCD và vai trò không thể tự thay đổi.
+                                    {t('profile.immutableHelp')}
                                 </p>
                                 <button className="btn-primary rounded-full px-8 py-3 text-base" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                    {isSubmitting ? t('profile.saving') : t('profile.save')}
                                 </button>
                             </div>
                         </form>

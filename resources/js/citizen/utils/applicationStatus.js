@@ -1,59 +1,63 @@
 const STATUS_PRESENTATION = {
     received: {
-        label: 'Đã tiếp nhận',
-        description: 'Hồ sơ đã được ghi nhận và đang chờ cán bộ kiểm tra.',
+        labelKey: 'status.received.label',
+        descriptionKey: 'status.received.description',
         tone: 'c-neutral',
     },
     processing: {
-        label: 'Đang xử lý',
-        description: 'Hồ sơ đang được cán bộ phụ trách xử lý.',
+        labelKey: 'status.processing.label',
+        descriptionKey: 'status.processing.description',
         tone: 'c-info',
     },
     supplement_required: {
-        label: 'Cần bổ sung',
-        description: 'Hồ sơ cần bổ sung thông tin hoặc tài liệu theo yêu cầu.',
+        labelKey: 'status.supplement_required.label',
+        descriptionKey: 'status.supplement_required.description',
         tone: 'c-warning',
     },
     approved: {
-        label: 'Đã duyệt',
-        description: 'Hồ sơ đã được duyệt và có thể có tài liệu kết quả.',
+        labelKey: 'status.approved.label',
+        descriptionKey: 'status.approved.description',
         tone: 'c-success',
     },
     rejected: {
-        label: 'Bị từ chối',
-        description: 'Hồ sơ đã bị từ chối. Vui lòng xem lý do xử lý.',
+        labelKey: 'status.rejected.label',
+        descriptionKey: 'status.rejected.description',
         tone: 'c-danger',
     },
 };
 
 export function statusPresentation(status) {
     return STATUS_PRESENTATION[status] ?? {
-        label: status || 'Không xác định',
-        description: '',
+        labelKey: null,
+        descriptionKey: null,
         tone: 'c-neutral',
     };
 }
 
-export function statusLabel(status) {
-    return statusPresentation(status).label;
+export function statusLabel(status, t = (key) => key) {
+    const presentation = statusPresentation(status);
+
+    return presentation.labelKey ? t(presentation.labelKey) : (status || t('status.unknown'));
 }
 
-export function statusDescription(status) {
-    return statusPresentation(status).description;
+export function statusDescription(status, t = (key) => key) {
+    const descriptionKey = statusPresentation(status).descriptionKey;
+
+    return descriptionKey ? t(descriptionKey) : '';
 }
 
 export function statusTone(status) {
     return statusPresentation(status).tone;
 }
 
-export function transitionDescription(entry) {
-    if (entry?.description) {
+export function transitionDescription(entry, t = (key) => key, useServerDescription = true) {
+    if (useServerDescription && entry?.description) {
         return entry.description;
     }
 
     if (!entry?.from_status) {
-        return 'Hồ sơ được nộp thành công và bắt đầu quy trình xử lý.';
+        return t('status.submittedDescription');
     }
 
-    return statusDescription(entry?.to_status);
+    return statusDescription(entry?.to_status, t);
 }

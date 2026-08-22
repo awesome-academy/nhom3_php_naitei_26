@@ -4,27 +4,29 @@ import { useEffect, useState } from 'react';
 import { getApiError, getRememberedCitizen, loginCitizen, rememberCitizenSession } from '../api/auth';
 import AuthShell from '../components/AuthShell';
 import FormField from '../components/FormField';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const initialForm = {
     email: '',
     password: '',
 };
 
-const googleErrorMessages = {
-    google_callback_failed: 'Không thể đăng nhập bằng Google. Vui lòng thử lại.',
-    google_login_denied: 'Tài khoản Google này không thể sử dụng khu vực công dân.',
-    google_missing_email: 'Tài khoản Google không cung cấp email hợp lệ.',
+const googleErrorKeys = {
+    google_callback_failed: 'auth.googleCallbackFailed',
+    google_login_denied: 'auth.googleLoginDenied',
+    google_missing_email: 'auth.googleMissingEmail',
 };
 
 export default function LoginPage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState(() => {
         const error = new URLSearchParams(location.search).get('auth_error');
 
-        return googleErrorMessages[error] ?? '';
+        return googleErrorKeys[error] ? t(googleErrorKeys[error]) : '';
     });
     const [flash, setFlash] = useState(location.state?.flash ?? '');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,7 +70,7 @@ export default function LoginPage() {
             navigate('/', {
                 replace: true,
                 state: {
-                    flash: 'Đăng nhập thành công.',
+                    flash: t('auth.loginSuccess'),
                 },
             });
         } catch (error) {
@@ -82,8 +84,8 @@ export default function LoginPage() {
 
     return (
         <AuthShell
-            description="Đăng nhập bằng email đã đăng ký."
-            title="Đăng nhập"
+            description={t('auth.loginDescription')}
+            title={t('auth.loginTitle')}
         >
             {flash && (
                 <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-success">
@@ -96,7 +98,7 @@ export default function LoginPage() {
                     <FormField
                         autoComplete="email"
                         errors={errors.email}
-                        label="Email"
+                        label={t('auth.email')}
                         name="email"
                         onChange={updateField}
                         type="email"
@@ -105,7 +107,7 @@ export default function LoginPage() {
                     <FormField
                         autoComplete="current-password"
                         errors={errors.password}
-                        label="Mật khẩu"
+                        label={t('auth.password')}
                         name="password"
                         onChange={updateField}
                         type="password"
@@ -119,12 +121,12 @@ export default function LoginPage() {
                     )}
 
                     <button className="btn-primary w-full rounded-full py-3 text-base" disabled={isSubmitting}>
-                        {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                        {isSubmitting ? t('auth.loggingIn') : t('auth.loginTitle')}
                     </button>
 
                     <div className="flex items-center gap-3 text-xs font-semibold uppercase text-gray-400">
                         <span className="h-px flex-1 bg-border" />
-                        Hoặc
+                        {t('auth.or')}
                         <span className="h-px flex-1 bg-border" />
                     </div>
 
@@ -135,15 +137,15 @@ export default function LoginPage() {
                         <span className="flex size-6 items-center justify-center rounded-full bg-white text-sm font-bold text-primary">
                             G
                         </span>
-                        Đăng nhập với Google
+                        {t('auth.googleLogin')}
                     </a>
                 </div>
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-600">
-                Bạn chưa có tài khoản?{' '}
+                {t('auth.noAccount')}{' '}
                 <Link className="font-semibold text-primary hover:text-primary-hover" to="/register">
-                    Đăng ký ngay
+                    {t('auth.registerNow')}
                 </Link>
             </p>
         </AuthShell>

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UI Base Showcase</title>
+    <title>Bộ giao diện cơ sở - {{ config('app.name') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('emblem-vietnam.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Import Google Fonts for demonstration -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,7 +13,14 @@
     <div class="max-w-4xl mx-auto space-y-8">
         
         <header class="mb-8">
-            <h1 class="text-3xl font-georgia font-bold text-primary mb-2">Public Service Portal - UI Base Showcase</h1>
+            <div class="mb-6 flex items-center gap-3">
+                <img class="h-14 w-14 shrink-0 object-contain" src="{{ asset('emblem-vietnam.svg') }}" alt="Quốc huy Việt Nam">
+                <div>
+                    <p class="text-lg font-bold leading-tight text-[#073d7d]">Cổng Dịch Vụ Công</p>
+                    <p class="mt-0.5 text-[10px] font-semibold tracking-[0.12em] text-gray-400">PHỤC VỤ NGƯỜI DÂN</p>
+                </div>
+            </div>
+            <h1 class="text-3xl font-georgia font-bold text-primary mb-2">Bộ giao diện cơ sở</h1>
             <p class="font-inter text-secondary">Đây là trang tổng hợp các component UI và design tokens dùng chung cho cả Citizen Site và Admin Site.</p>
         </header>
 

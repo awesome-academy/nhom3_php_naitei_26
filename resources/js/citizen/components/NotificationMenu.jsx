@@ -6,10 +6,12 @@ import {
     markAllNotificationsAsRead,
     markNotificationAsRead,
 } from '../api/notifications';
+import { useLanguage } from '../i18n/LanguageContext';
 import { formatDateTime } from '../utils/format';
 
 export default function NotificationMenu({ enabled = false }) {
     const navigate = useNavigate();
+    const { language, locale, t } = useLanguage();
     const menuRef = useRef(null);
     const notificationFingerprintRef = useRef('');
     const [isOpen, setIsOpen] = useState(false);
@@ -129,7 +131,7 @@ export default function NotificationMenu({ enabled = false }) {
     return (
         <div className="relative" ref={menuRef}>
             <button
-                aria-label="Thông báo"
+                aria-label={t('notification.title')}
                 className="relative flex h-11 w-11 items-center justify-center rounded-xl text-gray-600 transition hover:bg-gray-100"
                 onClick={handleOpen}
                 type="button"
@@ -149,8 +151,8 @@ export default function NotificationMenu({ enabled = false }) {
                 <div className="absolute right-0 z-20 mt-3 w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
                     <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
                         <div>
-                            <p className="text-sm font-bold text-gray-900">Thông báo</p>
-                            <p className="text-xs text-gray-500">{unreadCount} thông báo chưa đọc</p>
+                            <p className="text-sm font-bold text-gray-900">{t('notification.title')}</p>
+                            <p className="text-xs text-gray-500">{t('notification.unreadCount', { count: unreadCount })}</p>
                         </div>
                         {unreadCount > 0 && (
                             <button
@@ -158,16 +160,16 @@ export default function NotificationMenu({ enabled = false }) {
                                 onClick={handleMarkAllAsRead}
                                 type="button"
                             >
-                                Đọc tất cả
+                                {t('notification.markAllRead')}
                             </button>
                         )}
                     </div>
 
                     <div className="max-h-96 overflow-y-auto">
                         {isLoading ? (
-                            <p className="px-4 py-6 text-center text-sm text-gray-500">Đang tải thông báo...</p>
+                            <p className="px-4 py-6 text-center text-sm text-gray-500">{t('notification.loading')}</p>
                         ) : notifications.length === 0 ? (
-                            <p className="px-4 py-6 text-center text-sm text-gray-500">Bạn chưa có thông báo nào.</p>
+                            <p className="px-4 py-6 text-center text-sm text-gray-500">{t('notification.empty')}</p>
                         ) : notifications.map((notification) => (
                             <Link
                                 className={`block border-b border-gray-100 px-4 py-3 transition last:border-b-0 hover:bg-blue-50 ${
@@ -180,10 +182,18 @@ export default function NotificationMenu({ enabled = false }) {
                                 <div className="flex gap-3">
                                     <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${notification.read_at ? 'bg-gray-300' : 'bg-blue-600'}`}></span>
                                     <span className="min-w-0">
-                                        <span className="block text-sm font-semibold text-gray-900">{notification.title}</span>
-                                        <span className="mt-1 block text-sm leading-5 text-gray-600">{notification.message}</span>
+                                        <span className="block text-sm font-semibold text-gray-900">
+                                            {language === 'en' && notification.event
+                                                ? t(`notification.${notification.event}.title`)
+                                                : notification.title}
+                                        </span>
+                                        <span className="mt-1 block text-sm leading-5 text-gray-600">
+                                            {language === 'en' && notification.event
+                                                ? t(`notification.${notification.event}.message`, { code: notification.application_code })
+                                                : notification.message}
+                                        </span>
                                         <span className="mt-1 block text-xs text-gray-400">
-                                            {formatDateTime(notification.created_at)}
+                                            {formatDateTime(notification.created_at, locale)}
                                         </span>
                                     </span>
                                 </div>

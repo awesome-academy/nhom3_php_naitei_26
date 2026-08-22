@@ -1,4 +1,4 @@
-const STEPS = ['Thông tin', 'Tài liệu', 'Xem lại & Nộp'];
+import { useLanguage } from '../i18n/LanguageContext';
 
 function StepCircle({ step, index, current }) {
     const done = index < current;
@@ -20,9 +20,12 @@ function StepCircle({ step, index, current }) {
 }
 
 export default function ApplySteps({ currentStep }) {
+    const { t } = useLanguage();
+    const steps = [t('apply.stepInformation'), t('apply.stepDocuments'), t('apply.stepReview')];
+
     return (
         <ol className="flex items-center justify-center gap-3">
-            {STEPS.map((label, index) => (
+            {steps.map((label, index) => (
                 <li key={label} className="flex items-center gap-3">
                     <div className="flex items-center gap-2.5">
                         <StepCircle step={index} index={index} current={currentStep} />
@@ -30,7 +33,7 @@ export default function ApplySteps({ currentStep }) {
                             {label}
                         </span>
                     </div>
-                    {index < STEPS.length - 1 && (
+                    {index < steps.length - 1 && (
                         <div className={`h-0.5 w-10 rounded-full ${index < currentStep ? 'bg-success' : 'bg-gray-200'}`} />
                     )}
                 </li>

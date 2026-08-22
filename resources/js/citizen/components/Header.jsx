@@ -8,17 +8,30 @@ import {
     rememberCitizenSession,
 } from '../api/auth';
 import { fetchCitizenProfile } from '../api/profile';
+import { useLanguage } from '../i18n/LanguageContext';
+import BrandIdentity from './BrandIdentity';
+import LanguageSwitcher from './LanguageSwitcher';
 import NotificationMenu from './NotificationMenu';
+
+function logCitizenSessionSyncFailure(error) {
+    if (import.meta.env.DEV) {
+        console.warn('Không thể đồng bộ phiên công dân.', {
+            message: error?.message,
+            status: error?.response?.status,
+        });
+    }
+}
 
 export default function Header() {
     const { pathname } = useLocation();
+    const { t } = useLanguage();
     const [citizen, setCitizen] = useState(() => getRememberedCitizen());
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const navItems = [
-        { to: '/', label: 'Home', active: pathname === '/' },
-        { to: '/services', label: 'All Services', active: pathname.startsWith('/services') },
-        { to: '/applications', label: 'Track Application', active: pathname.startsWith('/applications') },
+        { to: '/', label: t('nav.home'), active: pathname === '/' },
+        { to: '/services', label: t('nav.services'), active: pathname.startsWith('/services') },
+        { to: '/applications', label: t('nav.applications'), active: pathname.startsWith('/applications') },
     ];
 
     useEffect(() => {
@@ -34,7 +47,9 @@ export default function Header() {
 
                 rememberCitizenSession(response.data);
                 setCitizen(response.data);
-            } catch {
+            } catch (error) {
+                logCitizenSessionSyncFailure(error);
+
                 if (!isMounted) {
                     return;
                 }
@@ -65,52 +80,65 @@ export default function Header() {
     }
 
     return (
-        <header className="bg-white border-b border-gray-200 px-10 flex h-20 items-center justify-between shrink-0">
-            <Link to="/" className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                </div>
-                <div>
-                    <h1 className="text-base font-bold text-gray-900 leading-tight">GovServices</h1>
-                    <p className="text-xs text-gray-500 leading-tight">Citizen Portal</p>
-                </div>
-            </Link>
-            <nav className="hidden md:flex items-center gap-2">
-                {navItems.map((item) => (
-                    <Link
-                        key={item.to}
-                        to={item.to}
-                        className={`px-5 py-2.5 text-[16px] font-semibold rounded-xl transition ${
-                            item.active ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'
-                        }`}
-                    >
-                        {item.label}
-                    </Link>
-                ))}
-            </nav>
-            <div className="flex items-center gap-3">
-                {citizen ? (
-                    <>
-                        <NotificationMenu enabled={Boolean(citizen)} />
-                        <Link className="hidden text-right sm:block" to="/profile">
-                            <span className="block max-w-40 truncate text-sm font-semibold text-gray-900">{citizen.name}</span>
-                            <span className="block max-w-40 truncate text-xs text-gray-500">{citizen.email}</span>
-                        </Link>
-                        <Link className="px-5 py-2.5 text-[15px] font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition" to="/profile">
-                            Hồ sơ
-                        </Link>
-                        <button
-                            className="px-5 py-2.5 text-[15px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition disabled:opacity-60"
-                            disabled={isLoggingOut}
-                            onClick={handleLogout}
-                            type="button"
+        <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-lg">
+            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-4 sm:px-8">
+                <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                    <BrandIdentity
+                        className="gap-2.5 sm:gap-3"
+                        markClassName="h-10 w-10 sm:h-12 sm:w-12"
+                        nameClassName="text-sm text-[#073d7d] sm:text-lg"
+                        sloganClassName="text-[9px] text-slate-400 sm:text-[10px]"
+                    />
+                </Link>
+
+                <nav className="hidden items-center gap-1 lg:flex" aria-label={t('nav.main')}>
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.to}
+                            to={item.to}
+                            className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                                item.active
+                                    ? 'bg-blue-50 text-[#075cca]'
+                                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#075cca]'
+                            }`}
                         >
-                            {isLoggingOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
-                        </button>
-                    </>
-                ) : (
-                    <Link to="/login" className="px-7 py-3 text-[17px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">Đăng nhập</Link>
-                )}
+                            {item.label}
+                        </Link>
+                    ))}
+                </nav>
+
+                <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                    {citizen ? (
+                        <>
+                            <NotificationMenu enabled={Boolean(citizen)} />
+                            <LanguageSwitcher />
+                            <Link className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-[#075cca] ring-1 ring-blue-100 transition hover:bg-blue-100" title={t('nav.profile')} to="/profile">
+                                {citizen.name?.charAt(0)?.toUpperCase() || 'C'}
+                            </Link>
+                            <button
+                                className="ml-0.5 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-2.5 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:opacity-60 sm:px-4"
+                                disabled={isLoggingOut}
+                                onClick={handleLogout}
+                                type="button"
+                            >
+                                <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path d="M10 17l5-5-5-5m5 5H3m10-9h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+                                </svg>
+                                <span className="hidden sm:inline">{isLoggingOut ? t('nav.loggingOut') : t('nav.logout')}</span>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <LanguageSwitcher />
+                            <Link className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-[#075cca] transition hover:bg-blue-50 sm:inline-flex" to="/register">
+                                {t('nav.register')}
+                            </Link>
+                            <Link className="rounded-xl bg-[#075cca] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#064da8] sm:px-5" to="/login">
+                                {t('nav.login')}
+                            </Link>
+                        </>
+                    )}
+                </div>
             </div>
         </header>
     );
