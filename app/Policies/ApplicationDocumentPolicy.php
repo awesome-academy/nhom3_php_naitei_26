@@ -32,6 +32,11 @@ class ApplicationDocumentPolicy
                     : Response::denyAsNotFound();
         }
 
+        // Citizen chỉ được tải kết quả sau khi hồ sơ đã duyệt/từ chối, tránh lộ trước khi manager duyệt
+        if ($document->document_kind->value === 'result' && ! $application->status->isTerminal()) {
+            return Response::deny('Tài liệu kết quả chưa sẵn sàng.', 403);
+        }
+
         return $user->id === $application->citizen_id;
     }
 
