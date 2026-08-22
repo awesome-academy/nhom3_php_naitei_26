@@ -76,6 +76,7 @@
                     'name' => $selectedLeader->name,
                     'email' => $selectedLeader->email,
                     'role' => $selectedLeader->role->value,
+                    'role_label' => $selectedLeader->role->label(),
                 ] : null),
             })"
             @click.outside="close()"
@@ -98,7 +99,7 @@
                     aria-controls="department-leader-options"
                     :aria-expanded="open.toString()"
                     autocomplete="off"
-                    placeholder="Nhập ít nhất 2 ký tự để tìm Manager"
+                    placeholder="Nhập ít nhất 2 ký tự để tìm quản lý"
                 >
                 <div
                     id="department-leader-options"
@@ -109,7 +110,7 @@
                 >
                     <p x-show="loading" class="px-3 py-2 text-sm text-gray-500">Đang tìm kiếm...</p>
                     <p x-show="error" x-text="error" class="px-3 py-2 text-sm text-danger"></p>
-                    <p x-show="!loading && !error && items.length === 0" class="px-3 py-2 text-sm text-gray-500">Không có Manager phù hợp.</p>
+                    <p x-show="!loading && !error && items.length === 0" class="px-3 py-2 text-sm text-gray-500">Không có quản lý phù hợp.</p>
                     <template x-for="(item, index) in items" :key="item.id">
                         <button
                             type="button"

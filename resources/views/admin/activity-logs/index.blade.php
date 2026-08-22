@@ -110,7 +110,8 @@
                                 $metadata = $log->metadata ?? [];
                                 $application = $metadata['application'] ?? null;
                                 $department = $metadata['department'] ?? null;
-                                $subjectLabel = $application['application_code'] ?? $department['name'] ?? class_basename((string) $log->subject_type);
+                                $subjectTypeLabel = $subjectTypeOptions[$log->subject_type] ?? 'Đối tượng khác';
+                                $subjectLabel = $application['application_code'] ?? $department['name'] ?? $subjectTypeLabel;
                                 $actionLabel = $actionOptions[$log->action] ?? $log->action;
                                 $detailId = 'activity-log-detail-'.$log->id;
                             @endphp
@@ -134,7 +135,7 @@
                                 </td>
                                 <td class="max-w-[180px]">
                                     <p class="truncate font-semibold text-gray-950" title="{{ $subjectLabel }}">{{ $subjectLabel }}</p>
-                                    <p class="truncate text-xs text-gray-500" title="{{ $log->subject_type }}">{{ class_basename((string) $log->subject_type) }} #{{ $log->subject_id }}</p>
+                                    <p class="truncate text-xs text-gray-500" title="{{ $log->subject_type }}">{{ $subjectTypeLabel }} #{{ $log->subject_id }}</p>
                                     @if (isset($application['status_label']))
                                         <p class="mt-1 text-xs text-gray-500">{{ $application['status_label'] }}</p>
                                     @endif
@@ -186,7 +187,7 @@
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">Đối tượng</dt>
-                        <dd class="mt-1 text-gray-950">{{ class_basename((string) $log->subject_type) }} #{{ $log->subject_id }}</dd>
+                        <dd class="mt-1 text-gray-950">{{ $subjectTypeOptions[$log->subject_type] ?? 'Đối tượng khác' }} #{{ $log->subject_id }}</dd>
                     </div>
                 </dl>
 
@@ -209,7 +210,9 @@
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">Vai trò</dt>
-                                <dd class="font-medium text-gray-700">{{ $actorSnapshot['role'] ?? 'Không ghi nhận' }}</dd>
+                                <dd class="font-medium text-gray-700">
+                                    {{ isset($actorSnapshot['role']) ? (\App\Enums\UserRole::tryFrom($actorSnapshot['role'])?->label() ?? 'Không ghi nhận') : 'Không ghi nhận' }}
+                                </dd>
                             </div>
                         </dl>
                     </div>

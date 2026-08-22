@@ -12,10 +12,10 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
-            self::Citizen => 'Citizen',
-            self::Staff => 'Staff',
-            self::Manager => 'Manager',
-            self::SuperAdmin => 'Super Admin',
+            self::Citizen => 'Công dân',
+            self::Staff => 'Nhân viên',
+            self::Manager => 'Quản lý',
+            self::SuperAdmin => 'Quản trị viên cấp cao',
         };
     }
 

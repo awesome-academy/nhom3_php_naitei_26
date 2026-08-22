@@ -45,7 +45,7 @@ final class AuthEventLogger
             action: 'access.denied',
             actor: $actor,
             request: $request,
-            description: 'Protected access denied.',
+            description: 'Đã từ chối truy cập vào khu vực được bảo vệ.',
             metadata: [
                 'reason' => $reason,
                 'path' => $request->path(),

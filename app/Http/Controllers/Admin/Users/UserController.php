@@ -145,11 +145,11 @@ class UserController extends Controller
             ->where('role', UserRole::SuperAdmin->value)
             ->where('is_active', true)
             ->count() <= 1) {
-            return 'Không thể vô hiệu hóa Super Admin đang hoạt động cuối cùng.';
+            return 'Không thể vô hiệu hóa quản trị viên cấp cao đang hoạt động cuối cùng.';
         }
 
         if ($target->isManager() && $target->ledDepartments->contains(fn ($department): bool => ! $department->trashed())) {
-            return 'Manager đang lãnh đạo một phòng ban hoạt động.';
+            return 'Quản lý đang lãnh đạo một phòng ban hoạt động.';
         }
 
         if (($target->isStaff() || $target->isManager()) && $target->unfinished_assigned_applications_count > 0) {

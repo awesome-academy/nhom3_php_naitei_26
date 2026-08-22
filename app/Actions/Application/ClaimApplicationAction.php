@@ -28,7 +28,7 @@ final readonly class ClaimApplicationAction
                 || ! $lockedActor->canAccessProtectedResources()
             ) {
                 throw ValidationException::withMessages([
-                    'application' => 'Chỉ Staff đang hoạt động hoặc Super Admin mới có thể nhận hồ sơ.',
+                    'application' => 'Chỉ nhân viên đang hoạt động hoặc quản trị viên cấp cao mới có thể nhận hồ sơ.',
                 ]);
             }
 

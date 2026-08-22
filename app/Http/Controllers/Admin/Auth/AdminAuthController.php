@@ -29,7 +29,7 @@ class AdminAuthController extends Controller
                 action: 'admin.login_failed',
                 actor: $this->isInternalUser($user) ? $user : null,
                 request: $request,
-                description: 'Admin login failed.',
+                description: 'Đăng nhập khu vực quản trị không thành công.',
                 metadata: [
                     'email' => $request->string('email')->toString(),
                     'reason' => 'invalid_credentials',
@@ -49,7 +49,7 @@ class AdminAuthController extends Controller
             actor: $user,
             subject: $user,
             request: $request,
-            description: 'Admin login succeeded.',
+            description: 'Đăng nhập khu vực quản trị thành công.',
         );
 
         return redirect()->intended(route('admin.dashboard', absolute: false));
@@ -65,7 +65,7 @@ class AdminAuthController extends Controller
                 actor: $user,
                 subject: $user,
                 request: $request,
-                description: 'Admin logout.',
+                description: 'Đăng xuất khỏi khu vực quản trị.',
             );
         }
 

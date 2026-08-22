@@ -13,6 +13,8 @@ import DocumentUploader from '../components/DocumentUploader';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
+import { useLanguage } from '../i18n/LanguageContext';
+import { localizeService } from '../i18n/content';
 import { statusDescription, statusLabel, transitionDescription } from '../utils/applicationStatus';
 import { formatBytes, formatDateTime } from '../utils/format';
 import { normalizeDocumentRequirements } from '../utils/schema';
@@ -21,6 +23,7 @@ export default function MyApplicationDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const { language, locale, t } = useLanguage();
 
     const [application, setApplication] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -37,6 +40,7 @@ export default function MyApplicationDetailPage() {
     const timeline = application?.timeline ?? [];
     const resultNote = application?.result_note ?? null;
     const rejectionReason = application?.rejection_reason ?? null;
+    const localizedService = localizeService(application?.service_type, language);
 
     async function loadApplication() {
         setLoadError(false);
@@ -49,7 +53,7 @@ export default function MyApplicationDetailPage() {
                 forgetCitizenSession();
                 navigate('/login', {
                     replace: true,
-                    state: { flash: 'Vui lòng đăng nhập để xem hồ sơ.' },
+                    state: { flash: t('applications.loginRequired') },
                 });
 
                 return;
@@ -81,7 +85,7 @@ export default function MyApplicationDetailPage() {
                 forgetCitizenSession();
                 navigate('/login', {
                     replace: true,
-                    state: { flash: 'Vui lòng đăng nhập để xem hồ sơ.' },
+                    state: { flash: t('applications.loginRequired') },
                 });
 
                 return;
@@ -211,7 +215,7 @@ export default function MyApplicationDetailPage() {
             <main className="min-h-screen bg-surface flex flex-col font-sans">
                 <Header />
                 <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex items-center justify-center py-20 text-gray-500">
-                    Đang tải...
+                    {t('common.loading')}
                 </div>
                 <Footer />
             </main>
@@ -223,9 +227,9 @@ export default function MyApplicationDetailPage() {
             <main className="min-h-screen bg-surface flex flex-col font-sans">
                 <Header />
                 <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex flex-col items-center justify-center py-20">
-                    <p className="text-gray-600">Không thể tải chi tiết hồ sơ.</p>
+                    <p className="text-gray-600">{t('applications.detailLoadError')}</p>
                     <button type="button" className="mt-4 text-sm font-semibold text-primary hover:underline" onClick={() => { setLoading(true); loadApplication(); }}>
-                        Thử lại
+                        {t('applications.tryAgain')}
                     </button>
                 </div>
                 <Footer />
@@ -238,14 +242,14 @@ export default function MyApplicationDetailPage() {
     const missingDocs = application.missing_required_documents ?? [];
 
     const serviceRequirements = normalizeDocumentRequirements({
-        document_requirements: application.service_type?.document_requirements,
+        document_requirements: localizedService?.document_requirements,
     });
     const requirementByCode = Object.fromEntries(serviceRequirements.map((requirement) => [requirement.code, requirement]));
 
     const documentGroups = [];
 
     documents.forEach((document) => {
-        const label = document.requirement_label || 'Tài liệu khác';
+        const label = document.requirement_label || t('applications.otherDocument');
         let group = documentGroups.find((item) => item.label === label);
 
         if (!group) {
@@ -268,7 +272,7 @@ export default function MyApplicationDetailPage() {
                 <div className="px-10 py-6 border-b border-gray-100">
                     <Link className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 transition" to="/applications">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                        Quay lại hồ sơ của tôi
+                        {t('applications.backToMine')}
                     </Link>
                 </div>
 
@@ -283,7 +287,7 @@ export default function MyApplicationDetailPage() {
                         <div>
                             <p className="font-consolas text-sm text-gray-500">{application.application_code}</p>
                             <h1 className="mt-1 text-[26px] font-bold tracking-tight text-gray-900">
-                                {application.service_type?.name ?? 'Dịch vụ'}
+                                {localizedService?.name ?? t('applications.service')}
                             </h1>
                         </div>
                         <StatusBadge status={application.status} />
@@ -291,19 +295,19 @@ export default function MyApplicationDetailPage() {
 
                     <div className="mt-8 grid gap-4 sm:grid-cols-2">
                         <div className="rounded-2xl border-[1.5px] border-gray-100 bg-gray-50 p-6">
-                            <h3 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">Ngày nộp</h3>
-                            <p className="mt-1 text-lg font-bold text-gray-900">{formatDateTime(application.submitted_at)}</p>
+                            <h3 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">{t('applications.submittedDate')}</h3>
+                            <p className="mt-1 text-lg font-bold text-gray-900">{formatDateTime(application.submitted_at, locale)}</p>
                         </div>
                         <div className="rounded-2xl border-[1.5px] border-gray-100 bg-gray-50 p-6">
-                            <h3 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">Trạng thái</h3>
-                            <p className="mt-1 text-lg font-bold text-gray-900">{statusLabel(application.status)}</p>
-                            <p className="mt-1 text-sm leading-6 text-gray-500">{statusDescription(application.status)}</p>
+                            <h3 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">{t('applications.status')}</h3>
+                            <p className="mt-1 text-lg font-bold text-gray-900">{statusLabel(application.status, t)}</p>
+                            <p className="mt-1 text-sm leading-6 text-gray-500">{statusDescription(application.status, t)}</p>
                         </div>
                     </div>
 
                     {formEntries.length > 0 && (
                         <section className="mt-8">
-                            <h2 className="mb-4 text-[18px] font-bold text-gray-900">Thông tin đã khai</h2>
+                            <h2 className="mb-4 text-[18px] font-bold text-gray-900">{t('applications.declaredInformation')}</h2>
                             <div className="rounded-2xl border-[1.5px] border-gray-100 bg-white p-6">
                                 <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
                                     {formEntries.map(([key, value]) => (
@@ -319,11 +323,11 @@ export default function MyApplicationDetailPage() {
 
                     {application.status === 'supplement_required' && supplementNote && (
                         <div className="mt-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-4" role="alert">
-                            <p className="text-[13px] font-bold uppercase tracking-wide text-amber-800">Yêu cầu bổ sung từ cán bộ</p>
+                            <p className="text-[13px] font-bold uppercase tracking-wide text-amber-800">{t('applications.supplementRequest')}</p>
                             <p className="mt-2 text-sm leading-6 text-amber-900 whitespace-pre-wrap">{supplementNote}</p>
                             {missingDocs.length > 0 && (
                                 <p className="mt-3 text-sm font-semibold text-amber-900">
-                                    Tài liệu cần bổ sung: {missingDocs.map((doc) => doc.label).join(', ')}
+                                    {t('applications.documentsNeeded', { names: missingDocs.map((doc) => doc.label).join(', ') })}
                                 </p>
                             )}
                         </div>
@@ -331,17 +335,17 @@ export default function MyApplicationDetailPage() {
 
                     {missingDocs.length > 0 && (application.status === 'received' || application.status === 'supplement_required') && (
                         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-danger">
-                            Thiếu {missingDocs.length} tài liệu bắt buộc: {missingDocs.map((doc) => doc.label).join(', ')}. Vui lòng tải lên để hồ sơ được xử lý.
+                            {t('applications.missingRequired', { count: missingDocs.length, names: missingDocs.map((doc) => doc.label).join(', ') })}
                         </div>
                     )}
 
                     <section className="mt-8">
-                        <h2 className="mb-4 text-[18px] font-bold text-gray-900">Tiến độ xử lý</h2>
+                        <h2 className="mb-4 text-[18px] font-bold text-gray-900">{t('applications.progress')}</h2>
                         {timeline.length > 0 ? (
                             <ol className="relative border-l border-gray-200 pl-6">
                                 {timeline.map((entry, idx) => {
-                                    const fromLabel = entry.from_status_label ?? statusLabel(entry.from_status);
-                                    const toLabel = entry.to_status_label ?? entry.label ?? statusLabel(entry.to_status);
+                                    const fromLabel = statusLabel(entry.from_status, t);
+                                    const toLabel = statusLabel(entry.to_status, t);
 
                                     return (
                                         <li key={`${entry.from_status}-${entry.to_status}-${entry.created_at}-${idx}`} className="mb-5 last:mb-0">
@@ -350,10 +354,10 @@ export default function MyApplicationDetailPage() {
                                                 {entry.from_status ? `${fromLabel} → ${toLabel}` : toLabel}
                                             </p>
                                             <p className="mt-1 text-sm leading-6 text-gray-600">
-                                                {transitionDescription(entry)}
+                                                {transitionDescription(entry, t, language === 'vi')}
                                             </p>
                                             <p className="mt-1 text-xs text-gray-500">
-                                                {entry.changed_by_name ? `bởi ${entry.changed_by_name}` : 'Hệ thống'} {entry.created_at ? `· ${formatDateTime(entry.created_at)}` : ''}
+                                                {entry.changed_by_name ? t('applications.byPerson', { name: entry.changed_by_name }) : t('common.system')} {entry.created_at ? `· ${formatDateTime(entry.created_at, locale)}` : ''}
                                             </p>
                                             {entry.note && (
                                                 <p className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700 whitespace-pre-wrap">{entry.note}</p>
@@ -364,38 +368,38 @@ export default function MyApplicationDetailPage() {
                             </ol>
                         ) : (
                             <p className="rounded-xl border border-gray-100 bg-gray-50 p-5 text-sm text-gray-600">
-                                Hồ sơ đã được tạo. Tiến độ xử lý sẽ được cập nhật khi cán bộ tiếp nhận hoặc thay đổi trạng thái.
+                                {t('applications.progressEmpty')}
                             </p>
                         )}
                     </section>
 
                     {application.status === 'approved' && (
                         <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4">
-                            <p className="text-[13px] font-bold uppercase tracking-wide text-emerald-800">Kết quả: Đã duyệt</p>
+                            <p className="text-[13px] font-bold uppercase tracking-wide text-emerald-800">{t('applications.approvedResult')}</p>
                             {resultNote && <p className="mt-2 text-sm text-emerald-900 whitespace-pre-wrap">{resultNote}</p>}
                             {application.completed_at && (
-                                <p className="mt-1 text-xs text-emerald-700">Hoàn tất lúc {formatDateTime(application.completed_at)}</p>
+                                <p className="mt-1 text-xs text-emerald-700">{t('applications.completedAt', { date: formatDateTime(application.completed_at, locale) })}</p>
                             )}
-                            <p className="mt-2 text-sm text-emerald-800">Vui lòng kiểm tra tài liệu kết quả bên dưới (nếu có) và liên hệ phòng ban nếu cần.</p>
+                            <p className="mt-2 text-sm text-emerald-800">{t('applications.resultHelp')}</p>
                         </div>
                     )}
 
                     {application.status === 'rejected' && (
                         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-4">
-                            <p className="text-[13px] font-bold uppercase tracking-wide text-red-800">Kết quả: Bị từ chối</p>
+                            <p className="text-[13px] font-bold uppercase tracking-wide text-red-800">{t('applications.rejectedResult')}</p>
                             {rejectionReason && <p className="mt-2 text-sm text-red-900 whitespace-pre-wrap">{rejectionReason}</p>}
                             {application.completed_at && (
-                                <p className="mt-1 text-xs text-red-700">Hoàn tất lúc {formatDateTime(application.completed_at)}</p>
+                                <p className="mt-1 text-xs text-red-700">{t('applications.completedAt', { date: formatDateTime(application.completed_at, locale) })}</p>
                             )}
                         </div>
                     )}
 
                     <section className="mt-8">
-                        <h2 className="mb-4 text-[18px] font-bold text-gray-900">Tài liệu đính kèm</h2>
+                        <h2 className="mb-4 text-[18px] font-bold text-gray-900">{t('applications.attachments')}</h2>
 
                         {documentGroups.length === 0 ? (
                             <p className="rounded-xl border border-gray-100 bg-gray-50 p-5 text-sm text-gray-600">
-                                Chưa có tài liệu nào.
+                                {t('applications.noAttachments')}
                             </p>
                         ) : (
                             <div className="space-y-6">
@@ -415,7 +419,7 @@ export default function MyApplicationDetailPage() {
                                                         <div className="min-w-0">
                                                             <p className="truncate text-[15px] font-semibold text-gray-900">{document.original_name}</p>
                                                             <p className="text-xs text-gray-500">
-                                                                {formatBytes(document.file_size)} · {formatDateTime(document.created_at)}
+                                                                {formatBytes(document.file_size)} · {formatDateTime(document.created_at, locale)}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -425,7 +429,7 @@ export default function MyApplicationDetailPage() {
                                                             className="rounded-lg px-4 py-2 text-sm font-semibold text-primary transition hover:bg-blue-50"
                                                             onClick={() => downloadApplicationDocument(id, document.id, document.original_name)}
                                                         >
-                                                            Tải xuống
+                                                            {t('common.download')}
                                                         </button>
                                                         {isEditable && (
                                                             <button
@@ -434,7 +438,7 @@ export default function MyApplicationDetailPage() {
                                                                 className="rounded-lg px-4 py-2 text-sm font-semibold text-danger transition hover:bg-red-50 disabled:opacity-50"
                                                                 onClick={() => handleDelete(document.id)}
                                                             >
-                                                                {deletingId === document.id ? 'Đang xóa...' : 'Xóa'}
+                                                                {deletingId === document.id ? t('applications.deleting') : t('common.delete')}
                                                             </button>
                                                         )}
                                                     </div>
@@ -449,7 +453,7 @@ export default function MyApplicationDetailPage() {
 
                     {canUpload && (
                         <section className="mt-8">
-                            <h2 className="mb-4 text-[18px] font-bold text-gray-900">Tải thêm tài liệu</h2>
+                            <h2 className="mb-4 text-[18px] font-bold text-gray-900">{t('applications.uploadMore')}</h2>
 
                             {missingSlots.length > 0 ? (
                                 <div className="space-y-6">
@@ -475,17 +479,17 @@ export default function MyApplicationDetailPage() {
                                                 className="btn-primary rounded-xl px-7 py-3 text-[15px]"
                                                 onClick={handleUpload}
                                             >
-                                                {uploading ? 'Đang tải lên...' : 'Tải lên tài liệu bổ sung'}
+                                                {uploading ? t('applications.uploading') : t('applications.uploadSupplement')}
                                             </button>
                                         </div>
                                     )}
-                                    <p className="mt-3 text-xs text-gray-500">Sau khi tải lên, hồ sơ vẫn ở trạng thái chờ bổ sung. Cán bộ sẽ kiểm tra và tiếp tục xử lý — bạn không cần bấm thêm nút nào.</p>
+                                    <p className="mt-3 text-xs text-gray-500">{t('applications.supplementPendingHelp')}</p>
                                 </div>
                             ) : (
                                 <div className="rounded-xl border border-gray-100 bg-gray-50 p-5 text-sm text-gray-600">
                                     {application.status === 'supplement_required'
-                                        ? 'Đã tải đủ các tài liệu được yêu cầu. Vui lòng chờ cán bộ tiếp tục xử lý — trạng thái sẽ tự cập nhật, không cần gửi thêm.'
-                                        : 'Hiện không có tài liệu nào cần bổ sung.'}
+                                        ? t('applications.supplementComplete')
+                                        : t('applications.noSupplementNeeded')}
                                 </div>
                             )}
                         </section>

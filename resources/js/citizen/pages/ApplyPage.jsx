@@ -9,6 +9,8 @@ import ApplySteps from '../components/ApplySteps';
 import DocumentUploader from '../components/DocumentUploader';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import { useLanguage } from '../i18n/LanguageContext';
+import { localizeService } from '../i18n/content';
 import { formatFee } from '../utils/format';
 import { normalizeDocumentRequirements, normalizeSchemaFields } from '../utils/schema';
 
@@ -48,6 +50,7 @@ function FieldInput({ field, value, onChange, hasError }) {
 export default function ApplyPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { language, locale, t } = useLanguage();
 
     const [service, setService] = useState(null);
     const [serviceError, setServiceError] = useState(false);
@@ -59,8 +62,9 @@ export default function ApplyPage() {
     const [message, setMessage] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    const fields = useMemo(() => (service ? normalizeSchemaFields(service) : []), [service]);
-    const requirements = useMemo(() => (service ? normalizeDocumentRequirements(service) : []), [service]);
+    const localizedService = useMemo(() => localizeService(service, language), [language, service]);
+    const fields = useMemo(() => (localizedService ? normalizeSchemaFields(localizedService) : []), [localizedService]);
+    const requirements = useMemo(() => (localizedService ? normalizeDocumentRequirements(localizedService) : []), [localizedService]);
 
     useEffect(() => {
         let isMounted = true;
@@ -76,7 +80,7 @@ export default function ApplyPage() {
                 forgetCitizenSession();
                 navigate('/login', {
                     replace: true,
-                    state: { flash: 'Vui lòng đăng nhập để nộp hồ sơ.' },
+                    state: { flash: t('apply.loginRequired') },
                 });
 
                 return;
@@ -125,14 +129,14 @@ export default function ApplyPage() {
 
             if (field.type === 'boolean') {
                 if (!value) {
-                    errors[field.name] = `Vui lòng xác nhận "${field.label}".`;
+                    errors[field.name] = t('apply.confirmField', { field: field.label });
                 }
 
                 return;
             }
 
             if (value === undefined || String(value).trim() === '') {
-                errors[field.name] = `Vui lòng nhập ${field.label.toLowerCase()}.`;
+                errors[field.name] = t('apply.enterField', { field: field.label.toLowerCase() });
             }
         });
 
@@ -191,7 +195,7 @@ export default function ApplyPage() {
             if (uploadFailures > 0) {
                 navigate(`/applications/${application.id}`, {
                     state: {
-                        flash: `Hồ sơ ${application.application_code} đã được tạo, nhưng ${uploadFailures} tài liệu chưa tải lên được. Vui lòng tải lại trong phần chi tiết.`,
+                        flash: t('apply.uploadPartial', { code: application.application_code, count: uploadFailures }),
                     },
                 });
 
@@ -199,7 +203,7 @@ export default function ApplyPage() {
             }
 
             navigate('/applications', {
-                state: { flash: `Nộp hồ sơ thành công. Mã hồ sơ: ${application.application_code}.` },
+                state: { flash: t('apply.success', { code: application.application_code }) },
             });
         } catch (error) {
             const apiError = getApiError(error);
@@ -208,7 +212,7 @@ export default function ApplyPage() {
                 forgetCitizenSession();
                 navigate('/login', {
                     replace: true,
-                    state: { flash: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.' },
+                    state: { flash: t('auth.sessionExpired') },
                 });
 
                 return;
@@ -225,21 +229,21 @@ export default function ApplyPage() {
             <main className="min-h-screen bg-surface flex flex-col font-sans">
                 <Header />
                 <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex items-center justify-center py-20 text-gray-500">
-                    Đang tải...
+                    {t('common.loading')}
                 </div>
                 <Footer />
             </main>
         );
     }
 
-    if (serviceError || !service) {
+    if (serviceError || !localizedService) {
         return (
             <main className="min-h-screen bg-surface flex flex-col font-sans">
                 <Header />
                 <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex flex-col items-center justify-center py-20">
-                    <p className="text-gray-600">Không tìm thấy dịch vụ.</p>
+                    <p className="text-gray-600">{t('apply.notFound')}</p>
                     <Link className="mt-4 text-sm font-semibold text-primary hover:underline" to="/services">
-                        Quay lại danh sách dịch vụ
+                        {t('services.backToList')}
                     </Link>
                 </div>
                 <Footer />
@@ -253,25 +257,25 @@ export default function ApplyPage() {
 
             <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex flex-col">
                 <div className="px-10 py-6 border-b border-gray-100">
-                    <Link className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 transition" to={`/services/${service.id}`}>
+                    <Link className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 transition" to={`/services/${localizedService.id}`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                        Quay lại chi tiết dịch vụ
+                        {t('apply.backToService')}
                     </Link>
                 </div>
 
                 <div className="flex-1 px-10 py-8">
                     <div className="mb-8">
-                        <h1 className="text-[26px] font-bold tracking-tight text-gray-900">{service.name}</h1>
-                        <p className="mt-1 text-sm text-gray-500">Nộp hồ sơ trực tuyến cho dịch vụ công.</p>
+                        <h1 className="text-[26px] font-bold tracking-tight text-gray-900">{localizedService.name}</h1>
+                        <p className="mt-1 text-sm text-gray-500">{t('apply.onlineForService')}</p>
                     </div>
 
                     <div className="mb-10">
                         <ApplySteps currentStep={currentStep} />
                     </div>
 
-                    {!service.is_active && (
+                    {!localizedService.is_active && (
                         <div className="mb-8 rounded-xl border border-red-200 bg-red-50 p-4 text-[15px] text-red-700">
-                            Dịch vụ này hiện đang tạm ngưng và không nhận hồ sơ mới.
+                            {t('apply.serviceSuspended')}
                         </div>
                     )}
 
@@ -291,18 +295,18 @@ export default function ApplyPage() {
 
                             {fields.length === 0 && (
                                 <p className="rounded-xl bg-gray-50 border border-gray-100 p-5 text-sm text-gray-600">
-                                    Dịch vụ này không yêu cầu nhập thêm thông tin.
+                                    {t('apply.noExtraFields')}
                                 </p>
                             )}
 
                             <div className="mt-8 flex justify-end">
                                 <button
                                     type="button"
-                                    disabled={!service.is_active}
+                                    disabled={!localizedService.is_active}
                                     className="btn-primary rounded-xl px-8 py-3 text-[15px]"
                                     onClick={goToStepOne}
                                 >
-                                    Tiếp tục: Tải tài liệu
+                                    {t('apply.continueDocuments')}
                                 </button>
                             </div>
                         </section>
@@ -320,10 +324,10 @@ export default function ApplyPage() {
                                                         {requirement.label}
                                                         {requirement.required && <span className="ml-1 text-danger">*</span>}
                                                     </p>
-                                                    <p className="mt-0.5 text-xs text-gray-500">Mã: {requirement.code}</p>
+                                                    <p className="mt-0.5 text-xs text-gray-500">{t('common.code')}: {requirement.code}</p>
                                                 </div>
                                                 {requirement.required && filesForCode(requirement.code).length === 0 && (
-                                                    <span className="shrink-0 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-danger">Còn thiếu</span>
+                                                    <span className="shrink-0 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-danger">{t('apply.missing')}</span>
                                                 )}
                                             </div>
                                             <DocumentUploader
@@ -346,10 +350,10 @@ export default function ApplyPage() {
 
                             <div className="mt-8 flex items-center justify-between">
                                 <button type="button" className="btn-secondary rounded-xl px-8 py-3 text-[15px]" onClick={() => setCurrentStep(0)}>
-                                    Quay lại
+                                    {t('common.back')}
                                 </button>
                                 <button type="button" className="btn-primary rounded-xl px-8 py-3 text-[15px]" onClick={goToStepTwo}>
-                                    Xem lại & Nộp
+                                    {t('apply.reviewSubmit')}
                                 </button>
                             </div>
                         </section>
@@ -358,36 +362,36 @@ export default function ApplyPage() {
                     {currentStep === 2 && (
                         <section className="mx-auto max-w-2xl">
                             <div className="rounded-2xl border-[1.5px] border-gray-100 bg-gray-50 p-6">
-                                <h3 className="mb-4 text-[17px] font-bold text-gray-900">Thông tin đã nhập</h3>
+                                <h3 className="mb-4 text-[17px] font-bold text-gray-900">{t('apply.enteredInformation')}</h3>
                                 <dl className="space-y-3">
                                     <div className="flex justify-between gap-6">
-                                        <dt className="text-sm text-gray-500">Dịch vụ</dt>
-                                        <dd className="text-sm font-semibold text-gray-900">{service.name}</dd>
+                                        <dt className="text-sm text-gray-500">{t('apply.service')}</dt>
+                                        <dd className="text-sm font-semibold text-gray-900">{localizedService.name}</dd>
                                     </div>
                                     {fields.map((field) => (
                                         <div key={field.name} className="flex justify-between gap-6">
                                             <dt className="text-sm text-gray-500">{field.label}</dt>
                                             <dd className="text-sm font-semibold text-gray-900">
                                                 {field.type === 'boolean'
-                                                    ? (formData[field.name] ? 'Có' : 'Không')
+                                                    ? (formData[field.name] ? t('common.yes') : t('common.no'))
                                                     : String(formData[field.name] ?? '—')}
                                             </dd>
                                         </div>
                                     ))}
                                     <div className="flex justify-between gap-6">
-                                        <dt className="text-sm text-gray-500">Tài liệu đính kèm</dt>
-                                        <dd className="text-sm font-semibold text-gray-900">{files.length} tài liệu</dd>
+                                        <dt className="text-sm text-gray-500">{t('apply.attachments')}</dt>
+                                        <dd className="text-sm font-semibold text-gray-900">{t('apply.attachmentCount', { count: files.length })}</dd>
                                     </div>
                                     <div className="flex justify-between gap-6">
-                                        <dt className="text-sm text-gray-500">Phí</dt>
-                                        <dd className="text-sm font-semibold text-gray-900">{formatFee(service.fee)}</dd>
+                                        <dt className="text-sm text-gray-500">{t('apply.fee')}</dt>
+                                        <dd className="text-sm font-semibold text-gray-900">{formatFee(localizedService.fee, locale, t('common.free'))}</dd>
                                     </div>
                                 </dl>
                             </div>
 
                             {missingRequired.length > 0 && (
                                 <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-danger">
-                                    Thiếu {missingRequired.length} tài liệu bắt buộc: {missingRequired.map((req) => req.label).join(', ')}. Bạn vẫn có thể nộp hồ sơ, nhưng hồ sơ có thể bị yêu cầu bổ sung sau khi xét duyệt.
+                                    {t('apply.missingRequired', { count: missingRequired.length, names: missingRequired.map((req) => req.label).join(', ') })}
                                 </div>
                             )}
 
@@ -397,15 +401,15 @@ export default function ApplyPage() {
 
                             <div className="mt-8 flex items-center justify-between">
                                 <button type="button" className="btn-secondary rounded-xl px-8 py-3 text-[15px]" onClick={() => setCurrentStep(1)}>
-                                    Quay lại
+                                    {t('common.back')}
                                 </button>
                                 <button
                                     type="button"
-                                    disabled={!service.is_active || submitting}
+                                    disabled={!localizedService.is_active || submitting}
                                     className="btn-success rounded-xl px-8 py-3 text-[15px]"
                                     onClick={submitApplication}
                                 >
-                                    {submitting ? 'Đang nộp...' : 'Nộp hồ sơ'}
+                                    {submitting ? t('apply.submitting') : t('apply.submit')}
                                 </button>
                             </div>
                         </section>

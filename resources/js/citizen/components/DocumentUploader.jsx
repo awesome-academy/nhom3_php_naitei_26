@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 import { requirementAccept } from '../utils/schema';
 
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -6,9 +7,6 @@ const MAX_SIZE = 10 * 1024 * 1024;
 const MIME_PDF = 'application/pdf';
 const MIME_JPEG = 'image/jpeg';
 const MIME_PNG = 'image/png';
-const HINT_PDF = 'Chỉ chấp nhận file PDF · Tối đa 10 MB';
-const HINT_IMAGE = 'Chỉ chấp nhận ảnh JPG, PNG · Tối đa 10 MB';
-const HINT_MIXED = 'PDF, JPG, PNG · Tối đa 10 MB mỗi file';
 
 function formatBytes(bytes) {
     if (!Number.isFinite(bytes)) {
@@ -37,23 +35,24 @@ function acceptedTypesFor(type) {
     }
 }
 
-function typeHint(type) {
+function typeHint(type, t) {
     switch (type) {
         case 'pdf':
-            return HINT_PDF;
+            return t('apply.uploadPdfHint');
         case 'image':
-            return HINT_IMAGE;
+            return t('apply.uploadImageHint');
         default:
-            return HINT_MIXED;
+            return t('apply.uploadMixedHint');
     }
 }
 
 export default function DocumentUploader({ requirement, files = [], onAdd, onRemove }) {
+    const { t } = useLanguage();
     const inputRef = useRef(null);
     const [message, setMessage] = useState('');
 
     const acceptedTypes = acceptedTypesFor(requirement?.type);
-    const hint = typeHint(requirement?.type);
+    const hint = typeHint(requirement?.type, t);
 
     function handleFiles(selected) {
         const next = Array.from(selected ?? []);
@@ -62,7 +61,7 @@ export default function DocumentUploader({ requirement, files = [], onAdd, onRem
         );
 
         if (invalid) {
-            setMessage('File không đúng loại yêu cầu của giấy tờ này hoặc vượt quá 10 MB.');
+            setMessage(t('apply.invalidFile'));
             return;
         }
 
@@ -81,7 +80,7 @@ export default function DocumentUploader({ requirement, files = [], onAdd, onRem
                     <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
                 </div>
                 <div className="text-center">
-                    <p className="text-base font-semibold text-gray-900">Kéo thả file vào đây hoặc nhấn để chọn</p>
+                    <p className="text-base font-semibold text-gray-900">{t('apply.dropFiles')}</p>
                     <p className="mt-1 text-sm text-gray-500">{hint}</p>
                 </div>
             </button>
@@ -121,7 +120,7 @@ export default function DocumentUploader({ requirement, files = [], onAdd, onRem
                                     className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-semibold text-danger transition hover:bg-red-50"
                                     onClick={() => onRemove(file, index)}
                                 >
-                                    Xóa
+                                    {t('common.delete')}
                                 </button>
                             </li>
                         );

@@ -24,7 +24,7 @@ final readonly class AssignApplicationAction
 
             if ($lockedStaff === null || ! $lockedStaff->isStaff() || ! $lockedStaff->canAccessProtectedResources()) {
                 throw ValidationException::withMessages([
-                    'staff_id' => 'Staff phải đang hoạt động để nhận hồ sơ.',
+                    'staff_id' => 'Nhân viên phải đang hoạt động để nhận hồ sơ.',
                 ]);
             }
 
@@ -55,7 +55,7 @@ final readonly class AssignApplicationAction
 
             if (! $isEligible) {
                 throw ValidationException::withMessages([
-                    'staff_id' => 'Staff phải đang hoạt động và thuộc phòng ban phụ trách dịch vụ của hồ sơ.',
+                    'staff_id' => 'Nhân viên phải đang hoạt động và thuộc phòng ban phụ trách dịch vụ của hồ sơ.',
                 ]);
             }
 

@@ -30,7 +30,7 @@ final readonly class RemoveDepartmentMember
             $lockedMember = User::withTrashed()->lockForUpdate()->findOrFail($member->getKey());
             if ($actor->isManager() && ! $lockedMember->isStaff()) {
                 throw ValidationException::withMessages([
-                    'member' => 'Manager chỉ có thể gỡ Staff khỏi phòng ban mình lãnh đạo.',
+                    'member' => 'Quản lý chỉ có thể gỡ nhân viên khỏi phòng ban mình lãnh đạo.',
                 ]);
             }
 

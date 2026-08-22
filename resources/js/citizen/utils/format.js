@@ -1,6 +1,6 @@
-const VIETNAMESE_LOCALE = 'vi-VN';
+const DEFAULT_LOCALE = 'vi-VN';
 
-export function formatDate(value) {
+export function formatDate(value, locale = DEFAULT_LOCALE) {
     if (!value) {
         return '';
     }
@@ -11,14 +11,14 @@ export function formatDate(value) {
         return '';
     }
 
-    return date.toLocaleDateString(VIETNAMESE_LOCALE, {
+    return date.toLocaleDateString(locale, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
     });
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value, locale = DEFAULT_LOCALE) {
     if (!value) {
         return '';
     }
@@ -29,7 +29,7 @@ export function formatDateTime(value) {
         return '';
     }
 
-    return date.toLocaleString(VIETNAMESE_LOCALE, {
+    return date.toLocaleString(locale, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -38,14 +38,14 @@ export function formatDateTime(value) {
     });
 }
 
-export function formatFee(fee) {
+export function formatFee(fee, locale = DEFAULT_LOCALE, freeLabel = 'Miễn phí') {
     const amount = Number(fee);
 
     if (!Number.isFinite(amount) || amount <= 0) {
-        return 'Miễn phí';
+        return freeLabel;
     }
 
-    return `${new Intl.NumberFormat(VIETNAMESE_LOCALE).format(amount)} ₫`;
+    return `${new Intl.NumberFormat(locale).format(amount)} ₫`;
 }
 
 export function formatBytes(bytes) {

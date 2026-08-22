@@ -7,10 +7,13 @@ import { fetchCitizenProfile } from '../api/profile';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
+import { useLanguage } from '../i18n/LanguageContext';
+import { localizeService } from '../i18n/content';
 import { formatDate } from '../utils/format';
 
 export default function MyApplicationsPage() {
     const navigate = useNavigate();
+    const { language, locale, t } = useLanguage();
     const [applications, setApplications] = useState([]);
     const [meta, setMeta] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -29,7 +32,7 @@ export default function MyApplicationsPage() {
                 forgetCitizenSession();
                 navigate('/login', {
                     replace: true,
-                    state: { flash: 'Vui lòng đăng nhập để xem hồ sơ của bạn.' },
+                    state: { flash: t('applications.loginRequired') },
                 });
 
                 return;
@@ -55,7 +58,7 @@ export default function MyApplicationsPage() {
                 forgetCitizenSession();
                 navigate('/login', {
                     replace: true,
-                    state: { flash: 'Vui lòng đăng nhập để xem hồ sơ của bạn.' },
+                    state: { flash: t('applications.loginRequired') },
                 });
 
                 return;
@@ -95,24 +98,24 @@ export default function MyApplicationsPage() {
             <div className="flex-1 w-full max-w-[1101px] mx-auto bg-white border-x border-gray-200 flex flex-col">
                 <div className="flex items-center justify-between px-10 py-6 border-b border-gray-100">
                     <div>
-                        <h1 className="text-[26px] font-bold tracking-tight text-gray-900">Hồ sơ của tôi</h1>
+                        <h1 className="text-[26px] font-bold tracking-tight text-gray-900">{t('applications.title')}</h1>
                         <p className="mt-1 text-sm text-gray-500">
-                            {meta?.total ? `${meta.total} hồ sơ · Chọn một hồ sơ để xem chi tiết` : 'Danh sách hồ sơ đã nộp'}
+                            {meta?.total ? t('applications.countSummary', { count: meta.total }) : t('applications.listSummary')}
                         </p>
                     </div>
                     <Link className="btn-primary rounded-xl px-6 py-3 text-[15px]" to="/services">
-                        + Nộp hồ sơ mới
+                        {t('applications.new')}
                     </Link>
                 </div>
 
                 <div className="flex-1 px-10 py-8">
                     {loading ? (
-                        <div className="py-10 text-center text-gray-500">Đang tải...</div>
+                        <div className="py-10 text-center text-gray-500">{t('common.loading')}</div>
                     ) : loadError ? (
                         <div className="py-10 text-center">
-                            <p className="text-gray-600">Không thể tải danh sách hồ sơ.</p>
+                            <p className="text-gray-600">{t('applications.loadError')}</p>
                             <button type="button" className="mt-4 text-sm font-semibold text-primary hover:underline" onClick={() => loadApplications(currentPage)}>
-                                Thử lại
+                                {t('applications.tryAgain')}
                             </button>
                         </div>
                     ) : applications.length === 0 ? (
@@ -120,10 +123,10 @@ export default function MyApplicationsPage() {
                             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
                                 <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                             </div>
-                            <h2 className="mt-5 text-lg font-bold text-gray-900">Bạn chưa có hồ sơ nào</h2>
-                            <p className="mt-1 text-sm text-gray-500">Chọn một dịch vụ và nộp hồ sơ đầu tiên của bạn.</p>
+                            <h2 className="mt-5 text-lg font-bold text-gray-900">{t('applications.empty')}</h2>
+                            <p className="mt-1 text-sm text-gray-500">{t('applications.emptyHelp')}</p>
                             <Link className="btn-primary mt-6 rounded-xl px-7 py-3 text-[15px]" to="/services">
-                                Xem danh mục dịch vụ
+                                {t('applications.viewCatalog')}
                             </Link>
                         </div>
                     ) : (
@@ -136,14 +139,14 @@ export default function MyApplicationsPage() {
                                 >
                                     <div className="min-w-0 flex-1 pr-6">
                                         <h4 className="truncate text-[17px] font-semibold text-gray-900 group-hover:text-blue-600 transition">
-                                            {application.service_type?.name ?? 'Dịch vụ'}
+                                            {localizeService(application.service_type, language)?.name ?? t('applications.service')}
                                         </h4>
                                         <p className="mt-1 font-consolas text-sm text-gray-500">{application.application_code}</p>
                                     </div>
                                     <div className="flex items-center gap-6 md:gap-8">
                                         <div className="w-36 text-left md:text-right">
-                                            <span className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest block">Ngày nộp</span>
-                                            <span className="text-[15px] font-semibold text-gray-700">{formatDate(application.submitted_at)}</span>
+                                            <span className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest block">{t('applications.submittedDate')}</span>
+                                            <span className="text-[15px] font-semibold text-gray-700">{formatDate(application.submitted_at, locale)}</span>
                                         </div>
                                         <div className="w-32 flex justify-end">
                                             <StatusBadge status={application.status} />
@@ -162,16 +165,16 @@ export default function MyApplicationsPage() {
                                 className="btn-secondary rounded-xl px-5 py-2.5 text-sm disabled:opacity-40"
                                 onClick={() => loadApplications(currentPage - 1)}
                             >
-                                Trang trước
+                                {t('applications.previousPage')}
                             </button>
-                            <span className="text-sm text-gray-500">Trang {currentPage} / {lastPage}</span>
+                            <span className="text-sm text-gray-500">{t('applications.page', { current: currentPage, last: lastPage })}</span>
                             <button
                                 type="button"
                                 disabled={currentPage >= lastPage}
                                 className="btn-secondary rounded-xl px-5 py-2.5 text-sm disabled:opacity-40"
                                 onClick={() => loadApplications(currentPage + 1)}
                             >
-                                Trang sau
+                                {t('applications.nextPage')}
                             </button>
                         </div>
                     )}

@@ -51,7 +51,7 @@ class TransferDepartmentMemberRequest extends FormRequest
             }
 
             if (! $member->isStaff() || ! $member->canAccessProtectedResources()) {
-                $validator->errors()->add('member', 'Chỉ Staff đang hoạt động mới có thể được điều chuyển.');
+                $validator->errors()->add('member', 'Chỉ nhân viên đang hoạt động mới có thể được điều chuyển.');
             }
 
             if ($validator->errors()->has('target_department_id')) {

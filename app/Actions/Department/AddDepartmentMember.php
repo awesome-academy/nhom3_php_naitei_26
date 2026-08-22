@@ -39,7 +39,7 @@ final readonly class AddDepartmentMember
 
                 if (! $member) {
                     throw ValidationException::withMessages([
-                        'user_id' => 'Chỉ Staff hoặc Manager đang hoạt động và phù hợp phạm vi mới có thể được thêm.',
+                        'user_id' => 'Chỉ nhân viên hoặc quản lý đang hoạt động và phù hợp phạm vi mới có thể được thêm.',
                     ]);
                 }
 

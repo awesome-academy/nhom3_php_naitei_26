@@ -101,14 +101,14 @@ final class DepartmentActivityLogger
     private function descriptionFor(string $action): string
     {
         return match ($action) {
-            self::CREATED => 'Department created.',
-            self::UPDATED => 'Department updated.',
-            self::ARCHIVED => 'Department archived.',
-            self::LEADER_CHANGED => 'Department leader changed.',
-            self::MEMBER_ADDED => 'Department member added.',
-            self::MEMBER_REMOVED => 'Department member removed.',
-            self::MEMBER_TRANSFERRED => 'Department member transferred.',
-            default => 'Department structure changed.',
+            self::CREATED => 'Đã tạo phòng ban.',
+            self::UPDATED => 'Đã cập nhật phòng ban.',
+            self::ARCHIVED => 'Đã lưu trữ phòng ban.',
+            self::LEADER_CHANGED => 'Đã thay đổi lãnh đạo phòng ban.',
+            self::MEMBER_ADDED => 'Đã thêm thành viên vào phòng ban.',
+            self::MEMBER_REMOVED => 'Đã gỡ thành viên khỏi phòng ban.',
+            self::MEMBER_TRANSFERRED => 'Đã điều chuyển thành viên sang phòng ban khác.',
+            default => 'Đã thay đổi cơ cấu phòng ban.',
         };
     }
 }

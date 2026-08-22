@@ -13,6 +13,7 @@ class CitizenSpaTest extends TestCase
         $response
             ->assertOk()
             ->assertViewIs('citizen.app')
+            ->assertSee('emblem-vietnam.svg')
             ->assertSee('id="citizen-app"', false);
     }
 

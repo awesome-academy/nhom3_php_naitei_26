@@ -35,7 +35,7 @@
                 <h2 id="user-profile-title" class="text-lg font-bold text-gray-950">Thông tin tài khoản</h2>
                 <dl class="mt-4 grid gap-4 sm:grid-cols-2">
                     @foreach ([
-                        ['Mã định danh Citizen', $user->citizen_id ?: 'Không có'],
+                        ['Mã định danh công dân', $user->citizen_id ?: 'Không có'],
                         ['Số điện thoại', $user->phone ?: 'Chưa cập nhật'],
                         ['Ngày sinh', $user->date_of_birth?->format('d/m/Y') ?: 'Chưa cập nhật'],
                         ['Giới tính', $user->gender ?: 'Chưa cập nhật'],
