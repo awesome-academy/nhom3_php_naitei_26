@@ -89,5 +89,5 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
 });
 
 Route::view('/{path}', 'citizen.app')
-    ->where('path', '^(?!admin(?:/|$)|api(?:/|$)).*$')
+    ->where('path', '^(?!admin(?:/|$)|api(?:/|$)|docs(?:/|$)).*$')
     ->name('citizen.fallback');

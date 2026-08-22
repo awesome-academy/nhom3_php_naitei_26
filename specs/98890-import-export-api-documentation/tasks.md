@@ -67,12 +67,12 @@
 
 ### Implementation Tasks for User Story 4
 
-- [ ] T023 [P] [US4] Configure `dedoc/scramble` package and route settings in `config/scramble.php`
-- [ ] T024 [US4] Register `/docs/api` route and authorization gate in `app/Providers/AppServiceProvider.php` (allow public access in local/staging, restrict to Admin role in production)
-- [ ] T025 [P] [US4] Add PHPDoc and Request annotations to API Controllers in `app/Http/Controllers/Api/V1/`
-- [ ] T026 [P] [US4] Create Feature tests for API Documentation endpoint availability in `tests/Feature/Api/ApiDocsTest.php`
-- [ ] T027 Execute Backend & Frontend linters (`composer run lint` and `npm run lint`)
-- [ ] T028 Execute end-to-end quickstart validation scenarios from `specs/98887-import-export-api-documentation/quickstart.md`
+- [x] T023 [P] [US4] Configure `dedoc/scramble` package and route settings in `config/scramble.php`
+- [x] T024 [US4] Register `/docs/api` route and authorization gate in `app/Providers/AppServiceProvider.php` (allow public access in local/staging, restrict to Admin role in production)
+- [x] T025 [P] [US4] Add PHPDoc and Request annotations to API Controllers in `app/Http/Controllers/Api/V1/`
+- [x] T026 [P] [US4] Create Feature tests for API Documentation endpoint availability in `tests/Feature/Api/ApiDocsTest.php`
+- [x] T027 Execute Backend & Frontend linters (`composer run lint` and `npm run lint`)
+- [x] T028 Execute end-to-end quickstart validation scenarios from `specs/98887-import-export-api-documentation/quickstart.md`
 
 ---
 
