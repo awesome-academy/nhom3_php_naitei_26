@@ -20,7 +20,7 @@ class DepartmentCandidateController extends Controller
         $this->authorize('create', Department::class);
         $term = $this->validatedSearchTerm($request);
 
-        $candidates = $this->searchUsers(User::query()->eligibleDepartmentLeaders(), $term)
+        $candidates = $this->searchUsers(User::query()->availableDepartmentLeaders(), $term)
             ->orderBy('name')
             ->orderBy('id')
             ->limit(self::RESULT_LIMIT + 1)
@@ -33,16 +33,7 @@ class DepartmentCandidateController extends Controller
     {
         $this->authorize('addMember', $department);
         $term = $this->validatedSearchTerm($request);
-        /** @var User $actor */
-        $actor = $request->user();
-
-        $query = $actor->isSuperAdmin()
-            ? User::query()->eligibleDepartmentMembers()
-            : User::query()->eligibleDepartmentStaff();
-        $query->whereDoesntHave('departments', fn (Builder $departmentQuery): Builder => $departmentQuery
-            ->whereKey($department->getKey()));
-
-        $candidates = $this->searchUsers($query, $term)
+        $candidates = $this->searchUsers(User::query()->availableDepartmentStaff(), $term)
             ->orderBy('name')
             ->orderBy('id')
             ->limit(self::RESULT_LIMIT + 1)

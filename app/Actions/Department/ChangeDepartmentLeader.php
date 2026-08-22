@@ -29,14 +29,17 @@ final readonly class ChangeDepartmentLeader
 
             $newLeader = null;
             if ($leaderId !== null) {
-                $newLeader = User::query()
-                    ->eligibleDepartmentLeaders()
+                $leaderQuery = $lockedDepartment->leader_id === $leaderId
+                    ? User::query()->eligibleDepartmentLeaders()
+                    : User::query()->availableDepartmentLeaders();
+
+                $newLeader = $leaderQuery
                     ->lockForUpdate()
                     ->find($leaderId);
 
                 if (! $newLeader) {
                     throw ValidationException::withMessages([
-                        'leader_id' => 'Chỉ quản lý đang hoạt động mới có thể làm lãnh đạo phòng ban.',
+                        'leader_id' => 'Chỉ quản lý đang hoạt động và chưa được phân công vào phòng ban nào mới có thể làm lãnh đạo.',
                     ]);
                 }
             }

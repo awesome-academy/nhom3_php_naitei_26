@@ -28,17 +28,13 @@ class StoreDepartmentMemberRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
-        $roles = $this->user()?->isSuperAdmin()
-            ? [UserRole::Staff->value, UserRole::Manager->value]
-            : [UserRole::Staff->value];
-
         return [
             'user_id' => [
                 'required',
                 'integer',
                 Rule::exists('users', 'id')->where(
                     fn (Builder $query): Builder => $query
-                        ->whereIn('role', $roles)
+                        ->where('role', UserRole::Staff->value)
                         ->where('is_active', true)
                         ->whereNull('deleted_at'),
                 ),
@@ -53,7 +49,7 @@ class StoreDepartmentMemberRequest extends FormRequest
         return [
             'user_id.required' => 'Vui lòng chọn thành viên.',
             'user_id.integer' => 'Thành viên được chọn không hợp lệ.',
-            'user_id.exists' => 'Chỉ nhân viên hoặc quản lý đang hoạt động và phù hợp phạm vi mới có thể được thêm.',
+            'user_id.exists' => 'Chỉ nhân viên đang hoạt động và chưa được phân công vào phòng ban nào mới có thể được thêm.',
             'version.required' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',
             'version.integer' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',
             'version.min' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',

@@ -86,6 +86,18 @@ final readonly class TransferDepartmentMember
                     ]);
                 }
 
+                $hasOtherActiveMembership = DB::table('department_user')
+                    ->join('departments', 'departments.id', '=', 'department_user.department_id')
+                    ->where('department_user.user_id', $lockedMember->getKey())
+                    ->where('department_user.department_id', '!=', $lockedSource->getKey())
+                    ->whereNull('departments.deleted_at')
+                    ->exists();
+                if ($hasOtherActiveMembership) {
+                    throw ValidationException::withMessages([
+                        'member' => 'Nhân viên đang thuộc nhiều phòng ban cũ nên chưa thể điều chuyển. Vui lòng xử lý các quan hệ cũ trước.',
+                    ]);
+                }
+
                 if (DB::table('department_user')
                     ->where('department_id', $lockedTarget->getKey())
                     ->where('user_id', $lockedMember->getKey())

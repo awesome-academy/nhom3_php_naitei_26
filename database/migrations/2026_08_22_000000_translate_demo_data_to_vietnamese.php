@@ -11,12 +11,12 @@ return new class extends Migration
     public function up(): void
     {
         $this->updateDemoUsers([
-            'admin@example.test' => ['Development Super Admin', 'Quản trị viên cấp cao Demo'],
-            'manager@example.test' => ['Development Manager', 'Quản lý Demo'],
-            'staff1@example.test' => ['Development Staff One', 'Nhân viên Demo 1'],
-            'staff2@example.test' => ['Development Staff Two', 'Nhân viên Demo 2'],
-            'citizen1@example.test' => ['Development Citizen One', 'Công dân Demo 1'],
-            'citizen2@example.test' => ['Development Citizen Two', 'Công dân Demo 2'],
+            'admin@example.test' => ['Development Super Admin', 'Quản trị viên cấp cao '],
+            'manager@example.test' => ['Development Manager', 'Quản lý'],
+            'staff1@example.test' => ['Development Staff One', 'Nhân viên 1'],
+            'staff2@example.test' => ['Development Staff Two', 'Nhân viên 2'],
+            'citizen1@example.test' => ['Development Citizen One', 'Công dân 1'],
+            'citizen2@example.test' => ['Development Citizen Two', 'Công dân 2'],
         ]);
 
         $this->updateDemoDepartments([
@@ -39,12 +39,12 @@ return new class extends Migration
     public function down(): void
     {
         $this->updateDemoUsers([
-            'admin@example.test' => ['Quản trị viên cấp cao Demo', 'Development Super Admin'],
-            'manager@example.test' => ['Quản lý Demo', 'Development Manager'],
-            'staff1@example.test' => ['Nhân viên Demo 1', 'Development Staff One'],
-            'staff2@example.test' => ['Nhân viên Demo 2', 'Development Staff Two'],
-            'citizen1@example.test' => ['Công dân Demo 1', 'Development Citizen One'],
-            'citizen2@example.test' => ['Công dân Demo 2', 'Development Citizen Two'],
+            'admin@example.test' => ['Quản trị viên cấp cao', 'Development Super Admin'],
+            'manager@example.test' => ['Quản lý', 'Development Manager'],
+            'staff1@example.test' => ['Nhân viên 1', 'Development Staff One'],
+            'staff2@example.test' => ['Nhân viên 2', 'Development Staff Two'],
+            'citizen1@example.test' => ['Công dân 1', 'Development Citizen One'],
+            'citizen2@example.test' => ['Công dân 2', 'Development Citizen Two'],
         ]);
 
         $this->updateDemoDepartments([

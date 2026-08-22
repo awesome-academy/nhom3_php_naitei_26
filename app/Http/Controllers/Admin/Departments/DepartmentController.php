@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class DepartmentController extends Controller
 {
@@ -72,7 +73,7 @@ class DepartmentController extends Controller
         $this->authorize('create', Department::class);
 
         $selectedLeader = old('leader_id')
-            ? User::query()->eligibleDepartmentLeaders()->find(old('leader_id'))
+            ? User::query()->availableDepartmentLeaders()->find(old('leader_id'))
             : null;
 
         return view('admin.departments.create', compact('selectedLeader'));
@@ -101,7 +102,22 @@ class DepartmentController extends Controller
             'serviceTypes' => fn ($query) => $query->withTrashed()->orderBy('name')->orderBy('service_types.id'),
         ]);
 
-        return view('admin.departments.show', compact('department'));
+        $leaderCandidates = Gate::allows('changeLeader', $department)
+            ? User::query()
+                ->availableDepartmentLeaders()
+                ->orderBy('name')
+                ->orderBy('id')
+                ->get(['id', 'name', 'email'])
+            : collect();
+        $staffCandidates = Gate::allows('addMember', $department)
+            ? User::query()
+                ->availableDepartmentStaff()
+                ->orderBy('name')
+                ->orderBy('id')
+                ->get(['id', 'name', 'email'])
+            : collect();
+
+        return view('admin.departments.show', compact('department', 'leaderCandidates', 'staffCandidates'));
     }
 
     public function edit(Department $department): View

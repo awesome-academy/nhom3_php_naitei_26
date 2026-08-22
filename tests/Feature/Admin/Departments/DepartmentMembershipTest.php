@@ -82,27 +82,61 @@ class DepartmentMembershipTest extends TestCase
         $this->assertNull($department->fresh()->leader_id);
     }
 
-    public function test_super_admin_can_add_staff_or_manager_and_duplicate_is_rejected(): void
+    public function test_manager_assigned_to_another_department_cannot_be_selected_as_leader(): void
+    {
+        $actor = $this->superAdmin();
+        $department = Department::factory()->create();
+        $assignedManager = User::factory()->manager()->create();
+        Department::factory()->create()->users()->attach($assignedManager);
+
+        $this->actingAs($actor)->patch(route('admin.departments.leader.update', $department), [
+            'leader_id' => $assignedManager->id,
+            'version' => 0,
+        ])->assertSessionHasErrors('leader_id');
+
+        $this->assertNull($department->fresh()->leader_id);
+    }
+
+    public function test_only_unassigned_staff_can_be_added_as_a_department_member(): void
     {
         $actor = $this->superAdmin();
         $department = Department::factory()->create();
         $staff = User::factory()->staff()->create();
         $manager = User::factory()->manager()->create();
-
-        foreach ([$staff, $manager] as $member) {
-            $this->actingAs($actor)->post(route('admin.departments.members.store', $department), [
-                'user_id' => $member->id,
-                'version' => $department->fresh()->lock_version,
-            ])->assertRedirect(route('admin.departments.show', $department));
-        }
+        $assignedStaff = User::factory()->staff()->create();
+        Department::factory()->create()->users()->attach($assignedStaff);
 
         $this->actingAs($actor)->post(route('admin.departments.members.store', $department), [
             'user_id' => $staff->id,
-            'version' => $department->fresh()->lock_version,
-        ])->assertSessionHasErrors('user_id');
+            'version' => 0,
+        ])->assertRedirect(route('admin.departments.show', $department));
+
+        foreach ([$staff, $manager, $assignedStaff] as $ineligibleMember) {
+            $this->actingAs($actor)->post(route('admin.departments.members.store', $department), [
+                'user_id' => $ineligibleMember->id,
+                'version' => 1,
+            ])->assertSessionHasErrors('user_id');
+        }
 
         $this->assertSame(1, $department->users()->whereKey($staff->id)->count());
-        $this->assertSame(1, $department->users()->whereKey($manager->id)->count());
+        $this->assertFalse($department->users()->whereKey($manager->id)->exists());
+        $this->assertFalse($department->users()->whereKey($assignedStaff->id)->exists());
+    }
+
+    public function test_department_creation_rejects_a_manager_already_assigned_elsewhere(): void
+    {
+        $actor = $this->superAdmin();
+        $assignedManager = User::factory()->manager()->create();
+        Department::factory()->create()->users()->attach($assignedManager);
+
+        $this->actingAs($actor)->post(route('admin.departments.store'), [
+            'name' => 'Phòng không hợp lệ',
+            'code' => 'INVALID-LEADER',
+            'address' => null,
+            'leader_id' => $assignedManager->id,
+        ])->assertSessionHasErrors('leader_id');
+
+        $this->assertDatabaseMissing('departments', ['code' => 'INVALID-LEADER']);
     }
 
     public function test_manager_can_manage_only_staff_in_led_department(): void

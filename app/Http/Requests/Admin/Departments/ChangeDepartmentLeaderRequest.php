@@ -48,7 +48,7 @@ class ChangeDepartmentLeaderRequest extends FormRequest
     {
         return [
             'leader_id.integer' => 'Lãnh đạo được chọn không hợp lệ.',
-            'leader_id.exists' => 'Chỉ quản lý đang hoạt động mới có thể làm lãnh đạo phòng ban.',
+            'leader_id.exists' => 'Chỉ quản lý đang hoạt động và chưa được phân công vào phòng ban nào mới có thể làm lãnh đạo.',
             'version.required' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',
             'version.integer' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',
             'version.min' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',

@@ -91,6 +91,24 @@ class DashboardTest extends TestCase
             ->assertSee('0');
     }
 
+    public function test_admin_header_does_not_duplicate_the_application_workspace_link(): void
+    {
+        $superAdmin = User::factory()->withRole(UserRole::SuperAdmin)->create();
+
+        $response = $this->actingAs($superAdmin)
+            ->get(route('admin.dashboard'))
+            ->assertOk();
+
+        $matched = preg_match(
+            '/<nav[^>]*aria-label="Điều hướng quản trị"[^>]*>(.*?)<\/nav>/s',
+            $response->getContent(),
+            $navigation,
+        );
+
+        $this->assertSame(1, $matched);
+        $this->assertStringNotContainsString('Hồ sơ', $navigation[1]);
+    }
+
     public function test_every_metric_drill_down_has_the_same_authorized_total(): void
     {
         $superAdmin = User::factory()->withRole(UserRole::SuperAdmin)->create();

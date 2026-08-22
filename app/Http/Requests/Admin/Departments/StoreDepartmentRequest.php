@@ -59,7 +59,7 @@ class StoreDepartmentRequest extends FormRequest
             'code.unique' => 'Mã phòng ban đã tồn tại, kể cả trong dữ liệu đã lưu trữ.',
             'address.max' => 'Địa chỉ không được vượt quá 1.000 ký tự.',
             'leader_id.integer' => 'Lãnh đạo được chọn không hợp lệ.',
-            'leader_id.exists' => 'Chỉ quản lý đang hoạt động mới có thể làm lãnh đạo phòng ban.',
+            'leader_id.exists' => 'Chỉ quản lý đang hoạt động và chưa được phân công vào phòng ban nào mới có thể làm lãnh đạo.',
         ];
     }
 
