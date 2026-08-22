@@ -7,6 +7,7 @@ use App\Enums\DocumentKind;
 use App\Models\Application;
 use App\Models\ApplicationDocument;
 use App\Models\User;
+use App\Support\Application\ApplicationActivityLogger;
 use App\Support\Application\ApplicationWorkflowNotifier;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ final readonly class StoreResultDocumentAction
 {
     public function __construct(
         private ApplicationWorkflowNotifier $workflowNotifier,
+        private ApplicationActivityLogger $activityLogger,
     ) {}
 
     public function handle(Application $application, User $actor, UploadedFile $file, ?string $requirementCode = null): ApplicationDocument
@@ -46,6 +48,7 @@ final readonly class StoreResultDocumentAction
                 'file_size' => $file->getSize(),
             ]);
 
+            $this->activityLogger->recordResultDocument($locked, $actor, $document);
             $this->workflowNotifier->resultDocumentAvailable($locked, $document, $actor);
 
             return $document;

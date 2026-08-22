@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogs\ActivityLogController;
 use App\Http\Controllers\Admin\Applications\ApplicationController;
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -83,6 +84,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/applications/{application}/documents/{document}/download', [ApplicationController::class, 'downloadDocument'])
             ->scopeBindings()
             ->name('applications.documents.download');
+        Route::get('/activity-logs', ActivityLogController::class)->name('activity-logs.index');
     });
 });
 

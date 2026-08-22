@@ -6,6 +6,7 @@ use App\Enums\ApplicationStatus;
 use App\Models\Application;
 use App\Models\ApplicationStatusHistory;
 use App\Models\User;
+use App\Support\Application\ApplicationActivityLogger;
 use App\Support\Application\ApplicationTransitionMap;
 use App\Support\Application\ApplicationWorkflowNotifier;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ abstract class TransitionsApplication
 {
     public function __construct(
         private readonly ApplicationWorkflowNotifier $workflowNotifier,
+        private readonly ApplicationActivityLogger $activityLogger,
     ) {}
 
     public function handle(Application $application, User $actor, ?string $note = null): Application
@@ -42,6 +44,7 @@ abstract class TransitionsApplication
                 'note' => $note,
             ]);
 
+            $this->activityLogger->recordStatusChange($locked, $actor, $from, $to, $note);
             $this->workflowNotifier->statusChanged($locked, $actor, $from, $to, $note);
 
             return $locked->refresh();

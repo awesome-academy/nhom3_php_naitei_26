@@ -30,12 +30,12 @@
 
 **CRITICAL**: No workflow notification/audit story should begin until this phase is complete.
 
-- [ ] T004 Create application workflow audit logger in `app/Support/Application/ApplicationActivityLogger.php`
+- [x] T004 Create application workflow audit logger in `app/Support/Application/ApplicationActivityLogger.php`
 - [x] T005 Create application notification builder in `app/Notifications/ApplicationStatusNotification.php`
 - [x] T006 Create workflow event dispatcher/service in `app/Support/Application/ApplicationWorkflowNotifier.php`
 - [x] T007 Integrate workflow event dispatcher into `app/Actions/Application/CreateApplicationAction.php` without changing application statuses
 - [x] T008 Integrate workflow event dispatcher into `app/Actions/Application/TransitionsApplication.php` after successful status history creation
-- [ ] T009 Integrate audit logging for assignment/claim/result-document actions in `app/Http/Controllers/Admin/Applications/ApplicationController.php`
+- [x] T009 Integrate audit logging for assignment/claim/result-document actions in `app/Http/Controllers/Admin/Applications/ApplicationController.php`
 - [ ] T010 [P] Add workflow event unit coverage in `tests/Feature/ApplicationWorkflowTraceabilityTest.php`
 
 **Checkpoint**: Application workflow can create status history, safe audit records, and in-app notification records from shared code.
@@ -100,19 +100,19 @@
 
 ### Tests for User Story 3
 
-- [ ] T029 [P] [US3] Add admin activity log authorization tests in `tests/Feature/Admin/ActivityLogTest.php`
-- [ ] T030 [P] [US3] Add admin activity log filter/search tests in `tests/Feature/Admin/ActivityLogTest.php`
-- [ ] T031 [P] [US3] Add application workflow audit tests in `tests/Feature/Admin/ApplicationWorkflowAuditTest.php`
+- [x] T029 [P] [US3] Add admin activity log authorization tests in `tests/Feature/Admin/ActivityLogTest.php`
+- [x] T030 [P] [US3] Add admin activity log filter/search tests in `tests/Feature/Admin/ActivityLogTest.php`
+- [x] T031 [P] [US3] Add application workflow audit tests in `tests/Feature/Admin/ApplicationWorkflowAuditTest.php`
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Add activity log query scopes to `app/Models/ActivityLog.php`
-- [ ] T033 [US3] Create admin activity log index request in `app/Http/Requests/Admin/ActivityLogs/IndexActivityLogRequest.php`
-- [ ] T034 [US3] Create admin activity log controller in `app/Http/Controllers/Admin/ActivityLogs/ActivityLogController.php`
-- [ ] T035 [US3] Register `/admin/activity-logs` route in `routes/web.php`
-- [ ] T036 [US3] Create admin activity log Blade view in `resources/views/admin/activity-logs/index.blade.php`
-- [ ] T037 [US3] Add navigation entry for activity logs in `resources/views/admin/layouts/app.blade.php`
-- [ ] T038 [US3] Ensure workflow audit metadata avoids sensitive fields in `app/Support/Application/ApplicationActivityLogger.php`
+- [x] T032 [US3] Add activity log query scopes to `app/Models/ActivityLog.php`
+- [x] T033 [US3] Create admin activity log index request in `app/Http/Requests/Admin/ActivityLogs/IndexActivityLogRequest.php`
+- [x] T034 [US3] Create admin activity log controller in `app/Http/Controllers/Admin/ActivityLogs/ActivityLogController.php`
+- [x] T035 [US3] Register `/admin/activity-logs` route in `routes/web.php`
+- [x] T036 [US3] Create admin activity log Blade view in `resources/views/admin/activity-logs/index.blade.php`
+- [x] T037 [US3] Add navigation entry for activity logs in `resources/views/admin/layouts/app.blade.php`
+- [x] T038 [US3] Ensure workflow audit metadata avoids sensitive fields in `app/Support/Application/ApplicationActivityLogger.php`
 
 **Checkpoint**: Admin audit log search is independently usable from the Admin area.
 

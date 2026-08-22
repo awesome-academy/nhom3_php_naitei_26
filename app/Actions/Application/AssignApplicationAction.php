@@ -6,12 +6,17 @@ use App\Enums\ApplicationStatus;
 use App\Models\Application;
 use App\Models\ApplicationAssignment;
 use App\Models\User;
+use App\Support\Application\ApplicationActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 final readonly class AssignApplicationAction
 {
+    public function __construct(
+        private ApplicationActivityLogger $activityLogger,
+    ) {}
+
     public function handle(Application $application, User $staff, User $actor, ?string $note = null): Application
     {
         return DB::transaction(function () use ($application, $staff, $actor, $note): Application {
@@ -67,6 +72,8 @@ final readonly class AssignApplicationAction
 
             $locked->assigned_staff_id = $lockedStaff->getKey();
             $locked->save();
+
+            $this->activityLogger->recordAssignment($locked, $actor, $lockedStaff, $note);
 
             return $locked->refresh();
         });
