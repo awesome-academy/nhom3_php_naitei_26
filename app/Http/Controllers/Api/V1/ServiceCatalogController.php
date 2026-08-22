@@ -4,18 +4,18 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\ServiceTypeResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\ServiceCategory;
 use App\Models\ServiceType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ServiceCatalogController extends Controller
 {
     /**
      * Display a listing of the active public services.
      */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $query = ServiceType::query()
             ->with('category')
@@ -34,18 +34,29 @@ class ServiceCatalogController extends Controller
         }
 
         $services = $query->paginate($request->input('per_page', 15));
+        $payload = ServiceTypeResource::collection($services)->response()->getData();
 
-        return ServiceTypeResource::collection($services);
+        return ApiResponse::success(
+            'Services retrieved successfully',
+            [
+                'data' => $payload->data,
+                'links' => $payload->links,
+                'meta' => $payload->meta,
+            ],
+        );
     }
 
     /**
      * Display the specified public service details.
      */
-    public function show(ServiceType $service): ServiceTypeResource
+    public function show(ServiceType $service): JsonResponse
     {
         $service->load('category');
 
-        return new ServiceTypeResource($service);
+        return ApiResponse::success(
+            'Service retrieved successfully',
+            new ServiceTypeResource($service),
+        );
     }
 
     /**
@@ -55,6 +66,9 @@ class ServiceCatalogController extends Controller
     {
         $categories = ServiceCategory::select('id', 'name', 'code', 'description')->get();
 
-        return response()->json(['data' => $categories]);
+        return ApiResponse::success(
+            'Service categories retrieved successfully',
+            $categories,
+        );
     }
 }

@@ -51,11 +51,11 @@
 
 ### Implementation Tasks for User Story 3
 
-- [ ] T018 [P] [US3] Create standardized ApiResponse helper/trait in `app/Http/Responses/ApiResponse.php`
-- [ ] T019 [P] [US3] Update JsonResource definitions to format data envelopes in `app/Http/Resources/Api/V1/`
-- [ ] T020 [US3] Refactor API Controllers to return standardized envelope responses in `app/Http/Controllers/Api/V1/`
-- [ ] T021 [US3] Enforce Sanctum Bearer token and Policy authorization middleware checks on API endpoints in `routes/api.php`
-- [ ] T022 [P] [US3] Create Feature tests for REST API envelope standardization and security in `tests/Feature/Api/ApiV1StandardizationTest.php`
+- [x] T018 [P] [US3] Create standardized ApiResponse helper/trait in `app/Http/Responses/ApiResponse.php`
+- [x] T019 [P] [US3] Update JsonResource definitions to format data envelopes in `app/Http/Resources/Api/V1/`
+- [x] T020 [US3] Refactor API Controllers to return standardized envelope responses in `app/Http/Controllers/Api/V1/`
+- [x] T021 [US3] Enforce Sanctum Bearer token and Policy authorization middleware checks on API endpoints in `routes/api.php`
+- [x] T022 [P] [US3] Create Feature tests for REST API envelope standardization and security in `tests/Feature/Api/ApiV1StandardizationTest.php`
 
 ---
 

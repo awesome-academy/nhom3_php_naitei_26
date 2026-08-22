@@ -9,6 +9,8 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -43,6 +45,16 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 409);
         });
 
+        $exceptions->render(function (ValidationException $exception, $request) {
+            if ($request->is('api/*')) {
+                return ApiResponse::error(
+                    $exception->getMessage(),
+                    $exception->errors(),
+                    $exception->status,
+                );
+            }
+        });
+
         $exceptions->render(function (AuthenticationException $exception, $request) {
             if ($request->is('api/*')) {
                 return ApiResponse::error('Chưa đăng nhập.', null, 401);
@@ -59,6 +71,16 @@ return Application::configure(basePath: dirname(__DIR__))
                         : 'Bạn không có quyền thực hiện thao tác này.',
                     null,
                     $status,
+                );
+            }
+        });
+
+        $exceptions->render(function (NotFoundHttpException $exception, $request) {
+            if ($request->is('api/*')) {
+                return ApiResponse::error(
+                    'Không tìm thấy tài nguyên.',
+                    null,
+                    404,
                 );
             }
         });
