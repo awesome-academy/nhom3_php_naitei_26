@@ -78,8 +78,12 @@ export default function HomePage() {
                 setCitizen(null);
             }
 
-            if (servicesResult.status === 'fulfilled' && servicesResult.value.data.data.length > 0) {
-                setFeaturedServices(servicesResult.value.data.data.slice(0, 4));
+            if (servicesResult.status === 'fulfilled') {
+                const payload = servicesResult.value.data?.data;
+                const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
+                if (Array.isArray(list) && list.length > 0) {
+                    setFeaturedServices(list.slice(0, 4));
+                }
             }
         }
 
