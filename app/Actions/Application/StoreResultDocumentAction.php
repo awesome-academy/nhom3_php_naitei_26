@@ -7,6 +7,7 @@ use App\Enums\DocumentKind;
 use App\Models\Application;
 use App\Models\ApplicationDocument;
 use App\Models\User;
+use App\Support\Application\ApplicationWorkflowNotifier;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -14,6 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 final readonly class StoreResultDocumentAction
 {
+    public function __construct(
+        private ApplicationWorkflowNotifier $workflowNotifier,
+    ) {}
+
     public function handle(Application $application, User $actor, UploadedFile $file, ?string $requirementCode = null): ApplicationDocument
     {
         return DB::transaction(function () use ($application, $actor, $file, $requirementCode): ApplicationDocument {
@@ -29,7 +34,7 @@ final readonly class StoreResultDocumentAction
 
             $path = $file->store('applications/'.$locked->getKey(), 'local');
 
-            return ApplicationDocument::query()->create([
+            $document = ApplicationDocument::query()->create([
                 'application_id' => $locked->getKey(),
                 'uploaded_by' => $actor->getKey(),
                 'document_kind' => DocumentKind::Result,
@@ -40,6 +45,10 @@ final readonly class StoreResultDocumentAction
                 'mime_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
             ]);
+
+            $this->workflowNotifier->resultDocumentAvailable($locked, $document, $actor);
+
+            return $document;
         });
     }
 }

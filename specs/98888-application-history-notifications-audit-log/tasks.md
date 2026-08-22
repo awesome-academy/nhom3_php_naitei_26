@@ -31,10 +31,10 @@
 **CRITICAL**: No workflow notification/audit story should begin until this phase is complete.
 
 - [ ] T004 Create application workflow audit logger in `app/Support/Application/ApplicationActivityLogger.php`
-- [ ] T005 Create application notification builder in `app/Notifications/ApplicationStatusNotification.php`
-- [ ] T006 Create workflow event dispatcher/service in `app/Support/Application/ApplicationWorkflowNotifier.php`
-- [ ] T007 Integrate workflow event dispatcher into `app/Actions/Application/CreateApplicationAction.php` without changing application statuses
-- [ ] T008 Integrate workflow event dispatcher into `app/Actions/Application/TransitionsApplication.php` after successful status history creation
+- [x] T005 Create application notification builder in `app/Notifications/ApplicationStatusNotification.php`
+- [x] T006 Create workflow event dispatcher/service in `app/Support/Application/ApplicationWorkflowNotifier.php`
+- [x] T007 Integrate workflow event dispatcher into `app/Actions/Application/CreateApplicationAction.php` without changing application statuses
+- [x] T008 Integrate workflow event dispatcher into `app/Actions/Application/TransitionsApplication.php` after successful status history creation
 - [ ] T009 Integrate audit logging for assignment/claim/result-document actions in `app/Http/Controllers/Admin/Applications/ApplicationController.php`
 - [ ] T010 [P] Add workflow event unit coverage in `tests/Feature/ApplicationWorkflowTraceabilityTest.php`
 
@@ -72,21 +72,21 @@
 
 ### Tests for User Story 2
 
-- [ ] T017 [P] [US2] Add notification API list/read tests in `tests/Feature/Api/V1/CitizenNotificationTest.php`
-- [ ] T018 [P] [US2] Add notification authorization tests in `tests/Feature/Api/V1/CitizenNotificationTest.php`
-- [ ] T019 [P] [US2] Add workflow notification creation tests in `tests/Feature/ApplicationWorkflowNotificationTest.php`
-- [ ] T020 [P] [US2] Add Citizen header notification render test in `tests/Feature/CitizenSpaTest.php`
+- [x] T017 [P] [US2] Add notification API list/read tests in `tests/Feature/Api/V1/CitizenNotificationTest.php`
+- [x] T018 [P] [US2] Add notification authorization tests in `tests/Feature/Api/V1/CitizenNotificationTest.php`
+- [x] T019 [P] [US2] Add workflow notification creation tests in `tests/Feature/ApplicationWorkflowNotificationTest.php`
+- [x] T020 [P] [US2] Add Citizen header notification render test in `tests/Feature/CitizenSpaTest.php`
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Create notification resource in `app/Http/Resources/Api/V1/NotificationResource.php`
-- [ ] T022 [US2] Create notification filter request in `app/Http/Requests/Api/V1/Notification/IndexNotificationRequest.php`
-- [ ] T023 [US2] Create Citizen notification controller in `app/Http/Controllers/Api/V1/NotificationController.php`
-- [ ] T024 [US2] Register Citizen notification routes in `routes/api.php`
-- [ ] T025 [US2] Add Citizen notification API client in `resources/js/citizen/api/notifications.js`
-- [ ] T026 [US2] Add notification dropdown/list component in `resources/js/citizen/components/NotificationMenu.jsx`
-- [ ] T027 [US2] Integrate notification unread badge/menu into `resources/js/citizen/components/Header.jsx`
-- [ ] T028 [US2] Link notifications to application detail routes in `resources/js/citizen/App.jsx`
+- [x] T021 [US2] Create notification resource in `app/Http/Resources/Api/V1/NotificationResource.php`
+- [x] T022 [US2] Create notification filter request in `app/Http/Requests/Api/V1/Notification/IndexNotificationRequest.php`
+- [x] T023 [US2] Create Citizen notification controller in `app/Http/Controllers/Api/V1/NotificationController.php`
+- [x] T024 [US2] Register Citizen notification routes in `routes/api.php`
+- [x] T025 [US2] Add Citizen notification API client in `resources/js/citizen/api/notifications.js`
+- [x] T026 [US2] Add notification dropdown/list component in `resources/js/citizen/components/NotificationMenu.jsx`
+- [x] T027 [US2] Integrate notification unread badge/menu into `resources/js/citizen/components/Header.jsx`
+- [x] T028 [US2] Link notifications to application detail routes in `resources/js/citizen/App.jsx`
 
 **Checkpoint**: Citizen notifications are independently usable from the Citizen area.
 

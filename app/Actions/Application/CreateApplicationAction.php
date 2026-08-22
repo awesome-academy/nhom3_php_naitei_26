@@ -8,6 +8,7 @@ use App\Models\ApplicationStatusHistory;
 use App\Models\ServiceType;
 use App\Models\User;
 use App\Services\ApplicationCodeService;
+use App\Support\Application\ApplicationWorkflowNotifier;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +16,7 @@ class CreateApplicationAction
 {
     public function __construct(
         private readonly ApplicationCodeService $applicationCodeService,
+        private readonly ApplicationWorkflowNotifier $workflowNotifier,
     ) {}
 
     /**
@@ -41,6 +43,8 @@ class CreateApplicationAction
                 'to_status' => ApplicationStatus::Received,
                 'changed_by' => $citizen->id,
             ]);
+
+            $this->workflowNotifier->applicationSubmitted($application, $citizen);
 
             return $application;
         });

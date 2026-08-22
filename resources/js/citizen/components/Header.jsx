@@ -8,6 +8,7 @@ import {
     rememberCitizenSession,
 } from '../api/auth';
 import { fetchCitizenProfile } from '../api/profile';
+import NotificationMenu from './NotificationMenu';
 
 export default function Header() {
     const { pathname } = useLocation();
@@ -90,6 +91,7 @@ export default function Header() {
             <div className="flex items-center gap-3">
                 {citizen ? (
                     <>
+                        <NotificationMenu enabled={Boolean(citizen)} />
                         <Link className="hidden text-right sm:block" to="/profile">
                             <span className="block max-w-40 truncate text-sm font-semibold text-gray-900">{citizen.name}</span>
                             <span className="block max-w-40 truncate text-xs text-gray-500">{citizen.email}</span>

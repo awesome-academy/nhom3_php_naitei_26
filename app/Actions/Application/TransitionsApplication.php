@@ -7,11 +7,16 @@ use App\Models\Application;
 use App\Models\ApplicationStatusHistory;
 use App\Models\User;
 use App\Support\Application\ApplicationTransitionMap;
+use App\Support\Application\ApplicationWorkflowNotifier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 abstract class TransitionsApplication
 {
+    public function __construct(
+        private readonly ApplicationWorkflowNotifier $workflowNotifier,
+    ) {}
+
     public function handle(Application $application, User $actor, ?string $note = null): Application
     {
         return DB::transaction(function () use ($application, $actor, $note): Application {
@@ -36,6 +41,8 @@ abstract class TransitionsApplication
                 'changed_by' => $actor->getKey(),
                 'note' => $note,
             ]);
+
+            $this->workflowNotifier->statusChanged($locked, $actor, $from, $to, $note);
 
             return $locked->refresh();
         });
