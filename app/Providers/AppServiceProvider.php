@@ -14,6 +14,7 @@ use App\Policies\DepartmentPolicy;
 use App\Policies\ServiceCategoryPolicy;
 use App\Policies\ServiceTypePolicy;
 use App\Policies\UserPolicy;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -38,5 +39,18 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ServiceCategory::class, ServiceCategoryPolicy::class);
         Gate::policy(ServiceType::class, ServiceTypePolicy::class);
         Gate::policy(User::class, UserPolicy::class);
+
+        Gate::define('viewApiDocs', function (?User $user) {
+            if ($this->app->environment('local', 'testing', 'staging')) {
+                return true;
+            }
+
+            return $user !== null && in_array($user->role->value, ['manager', 'super_admin'], true);
+        });
+
+        if (class_exists(Scramble::class)) {
+            Scramble::registerUiRoute('docs/api');
+            Scramble::registerJsonSpecificationRoute('docs/api.json');
+        }
     }
 }
