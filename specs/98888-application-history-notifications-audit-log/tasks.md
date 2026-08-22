@@ -126,13 +126,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T039 [P] [US4] Add optional mail channel test in `tests/Feature/ApplicationWorkflowEmailNotificationTest.php`
+- [x] T039 [P] [US4] Add optional mail channel test in `tests/Feature/ApplicationWorkflowEmailNotificationTest.php`
 
 ### Implementation for User Story 4
 
-- [ ] T040 [US4] Add optional mail representation to `app/Notifications/ApplicationStatusNotification.php`
-- [ ] T041 [US4] Respect `email_notifications_enabled` in `app/Notifications/ApplicationStatusNotification.php`
-- [ ] T042 [US4] Document mail environment expectations in `specs/98888-application-history-notifications-audit-log/quickstart.md`
+- [x] T040 [US4] Add optional mail representation to `app/Notifications/ApplicationStatusNotification.php`
+- [x] T041 [US4] Respect `email_notifications_enabled` in `app/Notifications/ApplicationStatusNotification.php`
+- [x] T042 [US4] Document mail environment expectations in `specs/98888-application-history-notifications-audit-log/quickstart.md`
 
 **Checkpoint**: Email notification support is present only if it does not delay required F06 scope.
 
@@ -142,11 +142,11 @@
 
 **Purpose**: Final validation, cleanup, and Redmine/PR readiness.
 
-- [ ] T043 [P] Update F06 contracts if endpoint or UI behavior changed in `specs/98888-application-history-notifications-audit-log/contracts/`
-- [ ] T044 [P] Review Vietnamese copy consistency in `resources/js/citizen` and `resources/views/admin/activity-logs/index.blade.php`
-- [ ] T045 Run `php artisan test --env=testing --filter=ApplicationTimelineTest`
-- [ ] T046 Run `php artisan test --env=testing --filter=CitizenNotificationTest`
-- [ ] T047 Run `php artisan test --env=testing --filter=ActivityLogTest`
+- [x] T043 [P] Update F06 contracts if endpoint or UI behavior changed in `specs/98888-application-history-notifications-audit-log/contracts/`
+- [x] T044 [P] Review Vietnamese copy consistency in `resources/js/citizen` and `resources/views/admin/activity-logs/index.blade.php`
+- [x] T045 Run `php artisan test --env=testing --filter=ApplicationTimelineTest`
+- [x] T046 Run `php artisan test --env=testing --filter=CitizenNotificationTest`
+- [x] T047 Run `php artisan test --env=testing --filter=ActivityLogTest`
 - [ ] T048 Run full validation: `php artisan test --env=testing`, `composer run lint`, `npm run lint`, and `npm run build`
 
 ---

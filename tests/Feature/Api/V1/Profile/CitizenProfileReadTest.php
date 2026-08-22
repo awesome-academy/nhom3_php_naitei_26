@@ -20,6 +20,7 @@ class CitizenProfileReadTest extends TestCase
             'date_of_birth' => '1995-05-20',
             'phone' => '0901234567',
             'address' => 'Ha Noi',
+            'email_notifications_enabled' => false,
         ]);
 
         $this->actingAs($citizen)
@@ -33,7 +34,8 @@ class CitizenProfileReadTest extends TestCase
             ->assertJsonPath('data.citizen_id', '012345678901')
             ->assertJsonPath('data.date_of_birth', '1995-05-20')
             ->assertJsonPath('data.phone', '0901234567')
-            ->assertJsonPath('data.address', 'Ha Noi');
+            ->assertJsonPath('data.address', 'Ha Noi')
+            ->assertJsonPath('data.email_notifications_enabled', false);
     }
 
     public function test_guest_cannot_read_current_profile(): void

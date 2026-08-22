@@ -12,6 +12,7 @@ const initialForm = {
     date_of_birth: '',
     phone: '',
     address: '',
+    email_notifications_enabled: true,
 };
 
 export default function ProfilePage() {
@@ -42,6 +43,7 @@ export default function ProfilePage() {
                     date_of_birth: response.data.date_of_birth ?? '',
                     phone: response.data.phone ?? '',
                     address: response.data.address ?? '',
+                    email_notifications_enabled: Boolean(response.data.email_notifications_enabled),
                 });
             } catch {
                 forgetCitizenSession();
@@ -76,9 +78,11 @@ export default function ProfilePage() {
     }, [flash]);
 
     function updateField(event) {
+        const { checked, name, type, value } = event.target;
+
         setForm((current) => ({
             ...current,
-            [event.target.name]: event.target.value,
+            [name]: type === 'checkbox' ? checked : value,
         }));
     }
 
@@ -188,6 +192,27 @@ export default function ProfilePage() {
                                         value={form.address}
                                     />
                                     <FieldError errors={errors.address} />
+                                </div>
+                                <div className="md:col-span-2 rounded-lg border border-border bg-gray-50 px-4 py-4">
+                                    <label className="flex cursor-pointer items-start gap-3" htmlFor="email_notifications_enabled">
+                                        <input
+                                            checked={form.email_notifications_enabled}
+                                            className="mt-1 size-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                            id="email_notifications_enabled"
+                                            name="email_notifications_enabled"
+                                            onChange={updateField}
+                                            type="checkbox"
+                                        />
+                                        <span>
+                                            <span className="block text-sm font-semibold text-gray-900">
+                                                Nhận thông báo qua email
+                                            </span>
+                                            <span className="mt-1 block text-sm leading-5 text-gray-600">
+                                                Gửi thêm email khi hồ sơ cần bổ sung, được duyệt hoặc bị từ chối.
+                                            </span>
+                                        </span>
+                                    </label>
+                                    <FieldError errors={errors.email_notifications_enabled} />
                                 </div>
                             </div>
 

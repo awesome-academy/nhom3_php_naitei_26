@@ -15,21 +15,25 @@ class ActivityLogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_internal_user_can_view_activity_log_and_citizen_cannot(): void
+    public function test_only_super_admin_can_view_activity_log(): void
     {
         $staff = User::factory()->staff()->create();
+        $manager = User::factory()->manager()->create();
+        $superAdmin = User::factory()->withRole(UserRole::SuperAdmin)->create();
         $citizen = User::factory()->withRole(UserRole::Citizen)->create();
-        $inactiveManager = User::factory()->manager()->inactive()->create();
+        $inactiveSuperAdmin = User::factory()->withRole(UserRole::SuperAdmin)->inactive()->create();
 
         $this->get(route('admin.activity-logs.index'))->assertRedirect(route('admin.login'));
         $this->actingAs($citizen)->get(route('admin.activity-logs.index'))->assertForbidden();
-        $this->actingAs($inactiveManager)->get(route('admin.activity-logs.index'))->assertForbidden();
-        $this->actingAs($staff)->get(route('admin.activity-logs.index'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.activity-logs.index'))->assertForbidden();
+        $this->actingAs($manager)->get(route('admin.activity-logs.index'))->assertForbidden();
+        $this->actingAs($inactiveSuperAdmin)->get(route('admin.activity-logs.index'))->assertForbidden();
+        $this->actingAs($superAdmin)->get(route('admin.activity-logs.index'))->assertOk();
     }
 
     public function test_activity_log_can_filter_by_actor_action_subject_keyword_and_date(): void
     {
-        $actor = User::factory()->staff()->create(['name' => 'Nguyen Audit']);
+        $actor = User::factory()->withRole(UserRole::SuperAdmin)->create(['name' => 'Nguyen Audit']);
         $otherActor = User::factory()->manager()->create();
         $application = Application::factory()->create(['application_code' => 'HS-SEARCH-0001']);
         $department = Department::factory()->create(['name' => 'Phong khac']);
@@ -80,9 +84,9 @@ class ActivityLogTest extends TestCase
 
     public function test_invalid_activity_log_filters_show_validation_errors(): void
     {
-        $staff = User::factory()->staff()->create();
+        $superAdmin = User::factory()->withRole(UserRole::SuperAdmin)->create();
 
-        $response = $this->actingAs($staff)->get(route('admin.activity-logs.index', [
+        $response = $this->actingAs($superAdmin)->get(route('admin.activity-logs.index', [
             'actor_id' => 'abc',
             'date_from' => '2026-08-20',
             'date_to' => '2026-08-19',

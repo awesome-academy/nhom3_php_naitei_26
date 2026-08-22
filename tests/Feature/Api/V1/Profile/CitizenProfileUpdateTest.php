@@ -21,6 +21,7 @@ class CitizenProfileUpdateTest extends TestCase
             'date_of_birth' => '1995-05-20',
             'phone' => '0901234567',
             'address' => 'Ha Noi',
+            'email_notifications_enabled' => true,
         ]);
 
         $response = $this->actingAs($citizen)->patchJson('/api/v1/me', [
@@ -28,6 +29,7 @@ class CitizenProfileUpdateTest extends TestCase
             'date_of_birth' => '1996-06-21',
             'phone' => '0912345678',
             'address' => 'Da Nang',
+            'email_notifications_enabled' => false,
         ]);
 
         $response
@@ -37,13 +39,15 @@ class CitizenProfileUpdateTest extends TestCase
             ->assertJsonPath('data.name', 'Nguyen Van B')
             ->assertJsonPath('data.date_of_birth', '1996-06-21')
             ->assertJsonPath('data.phone', '0912345678')
-            ->assertJsonPath('data.address', 'Da Nang');
+            ->assertJsonPath('data.address', 'Da Nang')
+            ->assertJsonPath('data.email_notifications_enabled', false);
 
         $this->assertDatabaseHas(User::class, [
             'id' => $citizen->id,
             'name' => 'Nguyen Van B',
             'phone' => '0912345678',
             'address' => 'Da Nang',
+            'email_notifications_enabled' => false,
         ]);
 
         $this->assertDatabaseHas(ActivityLog::class, [

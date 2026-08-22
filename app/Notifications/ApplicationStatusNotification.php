@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\ApplicationDocument;
 use App\Support\Application\ApplicationStatusPresenter;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ApplicationStatusNotification extends Notification
@@ -95,7 +96,26 @@ class ApplicationStatusNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        $channels = ['database'];
+
+        if ($this->shouldSendMail($notifiable)) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject($this->title)
+            ->greeting('Xin chào,')
+            ->line($this->message)
+            ->line("Mã hồ sơ: {$this->applicationCode}")
+            ->when($this->status !== null, fn (MailMessage $mail): MailMessage => $mail
+                ->line('Trạng thái: '.ApplicationStatusPresenter::label($this->status)))
+            ->action('Xem hồ sơ', url($this->url))
+            ->line('Cảm ơn bạn đã sử dụng cổng dịch vụ công.');
     }
 
     /**
@@ -119,5 +139,18 @@ class ApplicationStatusNotification extends Notification
     private static function applicationUrl(Application $application): string
     {
         return "/applications/{$application->getKey()}";
+    }
+
+    private function shouldSendMail(object $notifiable): bool
+    {
+        if (! (bool) ($notifiable->email_notifications_enabled ?? false)) {
+            return false;
+        }
+
+        return in_array($this->event, [
+            'application.supplement_requested',
+            'application.approved',
+            'application.rejected',
+        ], true);
     }
 }

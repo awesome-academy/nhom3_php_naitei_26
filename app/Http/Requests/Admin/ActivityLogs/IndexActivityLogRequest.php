@@ -11,7 +11,7 @@ class IndexActivityLogRequest extends FormRequest
         $user = $this->user();
 
         return $user !== null
-            && ($user->isStaff() || $user->isManager() || $user->isSuperAdmin())
+            && $user->isSuperAdmin()
             && $user->canAccessProtectedResources();
     }
 

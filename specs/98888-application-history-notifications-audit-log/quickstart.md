@@ -42,7 +42,17 @@ Expected result: unread count updates correctly and all notification messages ar
 
 Expected result: matching logs appear with actor, action, subject, timestamp, and safe metadata summary.
 
-### 4. Authorization Boundaries
+### 4. Optional Email Notifications
+
+1. Keep `MAIL_MAILER=log` or `MAIL_MAILER=array` for local/testing environments.
+2. Configure SMTP credentials only in private `.env` files when real email delivery is required.
+3. Ensure the citizen account has `email_notifications_enabled=true`.
+4. Trigger a major status change: supplement requested, approved, or rejected.
+5. Confirm the citizen still receives the in-app notification even when mail delivery is unavailable.
+
+Expected result: major citizen workflow events are email-ready without blocking the application workflow.
+
+### 5. Authorization Boundaries
 
 1. Attempt to access another citizen's notifications or timeline.
 2. Attempt to access the admin activity log as a citizen.

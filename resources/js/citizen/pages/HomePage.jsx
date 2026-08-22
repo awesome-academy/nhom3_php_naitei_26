@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { getRememberedCitizen } from '../api/auth';
+import { forgetCitizenSession, getRememberedCitizen, rememberCitizenSession } from '../api/auth';
+import { fetchCitizenProfile } from '../api/profile';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 
@@ -11,7 +12,33 @@ export default function HomePage() {
     const [flash, setFlash] = useState(location.state?.flash ?? '');
 
     useEffect(() => {
-        setCitizen(getRememberedCitizen());
+        let isMounted = true;
+
+        async function syncCitizen() {
+            try {
+                const response = await fetchCitizenProfile();
+
+                if (!isMounted) {
+                    return;
+                }
+
+                rememberCitizenSession(response.data);
+                setCitizen(response.data);
+            } catch {
+                if (!isMounted) {
+                    return;
+                }
+
+                forgetCitizenSession();
+                setCitizen(null);
+            }
+        }
+
+        syncCitizen();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     useEffect(() => {

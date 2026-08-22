@@ -36,6 +36,7 @@ class ProfileController extends Controller
             'date_of_birth',
             'phone',
             'address',
+            'email_notifications_enabled',
         ]));
         $user->save();
 
@@ -51,6 +52,7 @@ class ProfileController extends Controller
                     'date_of_birth',
                     'phone',
                     'address',
+                    'email_notifications_enabled',
                 ])),
             ],
         );

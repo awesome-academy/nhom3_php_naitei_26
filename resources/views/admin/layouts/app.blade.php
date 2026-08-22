@@ -102,16 +102,18 @@
                     Nhập dữ liệu CSV
                 </a>
 
-                <a
-                    href="{{ route('admin.activity-logs.index') }}"
-                    @class([
-                        'whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
-                        'bg-white/20 text-white' => request()->routeIs('admin.activity-logs.*'),
-                        'text-white/65 hover:bg-white/10 hover:text-white' => ! request()->routeIs('admin.activity-logs.*'),
-                    ])
-                >
-                    Nhật ký
-                </a>
+                @if (auth()->user()?->isSuperAdmin())
+                    <a
+                        href="{{ route('admin.activity-logs.index') }}"
+                        @class([
+                            'whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                            'bg-white/20 text-white' => request()->routeIs('admin.activity-logs.*'),
+                            'text-white/65 hover:bg-white/10 hover:text-white' => ! request()->routeIs('admin.activity-logs.*'),
+                        ])
+                    >
+                        Nhật ký
+                    </a>
+                @endif
             </nav>
 
             <div class="flex shrink-0 items-center gap-1 sm:gap-3">

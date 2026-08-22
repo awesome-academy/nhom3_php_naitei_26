@@ -92,3 +92,10 @@ Authenticated Citizen users.
 - Non-citizen request returns `403`.
 - Attempting to read another user's notification returns `404` or `403`.
 - Invalid filter returns validation error with Vietnamese message.
+
+## Optional Email Delivery
+
+- In-app database notifications remain the canonical Citizen notification channel.
+- High-importance events may also prepare email delivery when the recipient has `email_notifications_enabled=true`.
+- Email delivery applies to supplement requested, approved, and rejected status events.
+- Email delivery failures must not block status updates or in-app notification creation.
