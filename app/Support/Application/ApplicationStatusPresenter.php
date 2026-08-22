@@ -21,8 +21,10 @@ final class ApplicationStatusPresenter
     {
         return match ($status) {
             ApplicationStatus::Received => 'Đã tiếp nhận',
+            ApplicationStatus::Assigned => 'Đã phân công',
             ApplicationStatus::Processing => 'Đang xử lý',
             ApplicationStatus::SupplementRequired => 'Cần bổ sung',
+            ApplicationStatus::PendingApproval => 'Chờ duyệt',
             ApplicationStatus::Approved => 'Đã duyệt',
             ApplicationStatus::Rejected => 'Bị từ chối',
         };
@@ -32,8 +34,10 @@ final class ApplicationStatusPresenter
     {
         return match ($status) {
             ApplicationStatus::Received => 'Hồ sơ đã được ghi nhận và đang chờ cán bộ kiểm tra.',
+            ApplicationStatus::Assigned => 'Hồ sơ đã được phân công cho cán bộ xử lý.',
             ApplicationStatus::Processing => 'Hồ sơ đang được cán bộ phụ trách xử lý.',
             ApplicationStatus::SupplementRequired => 'Hồ sơ cần bổ sung thông tin hoặc tài liệu theo yêu cầu.',
+            ApplicationStatus::PendingApproval => 'Hồ sơ đã được cán bộ gửi chờ phê duyệt của quản lý.',
             ApplicationStatus::Approved => 'Hồ sơ đã được duyệt và có thể có tài liệu kết quả.',
             ApplicationStatus::Rejected => 'Hồ sơ đã bị từ chối. Vui lòng xem lý do xử lý.',
         };
@@ -47,8 +51,12 @@ final class ApplicationStatusPresenter
 
         return match ($to) {
             ApplicationStatus::Received => 'Hồ sơ quay về trạng thái đã tiếp nhận.',
-            ApplicationStatus::Processing => 'Hồ sơ được chuyển sang bước xử lý.',
+            ApplicationStatus::Assigned => 'Hồ sơ đã được phân công cho cán bộ xử lý.',
+            ApplicationStatus::Processing => $from === ApplicationStatus::PendingApproval
+                ? 'Quản lý trả hồ sơ về để cán bộ xử lý lại.'
+                : 'Hồ sơ được chuyển sang bước xử lý.',
             ApplicationStatus::SupplementRequired => 'Cán bộ yêu cầu bổ sung để tiếp tục xử lý hồ sơ.',
+            ApplicationStatus::PendingApproval => 'Cán bộ đã gửi kết quả chờ quản lý duyệt.',
             ApplicationStatus::Approved => 'Hồ sơ được duyệt sau quá trình xử lý.',
             ApplicationStatus::Rejected => 'Hồ sơ bị từ chối sau quá trình xem xét.',
         };

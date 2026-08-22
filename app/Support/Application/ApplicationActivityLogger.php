@@ -27,6 +27,10 @@ final class ApplicationActivityLogger
 
     public const RESULT_DOCUMENT_UPLOADED = 'application.result_document_uploaded';
 
+    public const SUBMITTED_FOR_APPROVAL = 'application.submitted_for_approval';
+
+    public const RETURNED_TO_PROCESSING = 'application.returned_to_processing';
+
     /**
      * @param  array<string, mixed>  $metadata
      */
@@ -154,14 +158,16 @@ final class ApplicationActivityLogger
 
     public function actionForTransition(ApplicationStatus $from, ApplicationStatus $to): string
     {
-        return match ($to) {
-            ApplicationStatus::Processing => $from === ApplicationStatus::SupplementRequired
-                ? self::PROCESSING_RESUMED
-                : self::PROCESSING_STARTED,
-            ApplicationStatus::SupplementRequired => self::SUPPLEMENT_REQUESTED,
-            ApplicationStatus::Approved => self::APPROVED,
-            ApplicationStatus::Rejected => self::REJECTED,
-            ApplicationStatus::Received => self::PROCESSING_RESUMED,
+        return match (true) {
+            $to === ApplicationStatus::Processing && $from === ApplicationStatus::PendingApproval => self::RETURNED_TO_PROCESSING,
+            $to === ApplicationStatus::Processing && $from === ApplicationStatus::SupplementRequired => self::PROCESSING_RESUMED,
+            $to === ApplicationStatus::Processing => self::PROCESSING_STARTED,
+            $to === ApplicationStatus::SupplementRequired => self::SUPPLEMENT_REQUESTED,
+            $to === ApplicationStatus::PendingApproval => self::SUBMITTED_FOR_APPROVAL,
+            $to === ApplicationStatus::Approved => self::APPROVED,
+            $to === ApplicationStatus::Rejected => self::REJECTED,
+            $to === ApplicationStatus::Assigned => self::PROCESSING_STARTED,
+            default => self::PROCESSING_STARTED,
         };
     }
 
@@ -175,6 +181,8 @@ final class ApplicationActivityLogger
             self::PROCESSING_RESUMED => "Tiếp tục xử lý hồ sơ {$application->application_code}.",
             self::APPROVED => "Duyệt hồ sơ {$application->application_code}.",
             self::REJECTED => "Từ chối hồ sơ {$application->application_code}.",
+            self::SUBMITTED_FOR_APPROVAL => "Gửi hồ sơ {$application->application_code} chờ duyệt.",
+            self::RETURNED_TO_PROCESSING => "Trả hồ sơ {$application->application_code} về xử lý lại.",
             self::RESULT_DOCUMENT_UPLOADED => "Đính kèm tài liệu kết quả cho hồ sơ {$application->application_code}.",
             default => "Cập nhật hồ sơ {$application->application_code}.",
         };

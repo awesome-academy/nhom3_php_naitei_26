@@ -5,6 +5,7 @@ namespace App\Actions\Application;
 use App\Enums\ApplicationStatus;
 use App\Models\Application;
 use App\Models\ApplicationAssignment;
+use App\Models\ApplicationStatusHistory;
 use App\Models\User;
 use App\Support\Application\ApplicationActivityLogger;
 use Illuminate\Support\Facades\DB;
@@ -59,7 +60,21 @@ final readonly class ClaimApplicationAction
             ]);
 
             $locked->assigned_staff_id = $lockedActor->getKey();
-            $locked->save();
+            // Transition Received -> Assigned on claim
+            if ($locked->status === ApplicationStatus::Received) {
+                $from = $locked->status;
+                $locked->status = ApplicationStatus::Assigned;
+                $locked->save();
+                ApplicationStatusHistory::query()->create([
+                    'application_id' => $locked->getKey(),
+                    'from_status' => $from,
+                    'to_status' => ApplicationStatus::Assigned,
+                    'changed_by' => $lockedActor->getKey(),
+                    'note' => null,
+                ]);
+            } else {
+                $locked->save();
+            }
 
             $this->activityLogger->recordClaim($locked, $lockedActor);
 

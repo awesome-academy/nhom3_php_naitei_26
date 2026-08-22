@@ -26,8 +26,10 @@ class DashboardController extends Controller
                 <<<SQL
                     COUNT(*) AS total,
                     COUNT(*) FILTER (WHERE applications.status = ?) AS received,
+                    COUNT(*) FILTER (WHERE applications.status = ?) AS assigned,
                     COUNT(*) FILTER (WHERE applications.status = ?) AS processing,
                     COUNT(*) FILTER (WHERE applications.status = ?) AS supplement_required,
+                    COUNT(*) FILTER (WHERE applications.status = ?) AS pending_approval,
                     COUNT(*) FILTER (WHERE applications.status IN ({$completedPlaceholders})) AS completed,
                     COUNT(*) FILTER (
                         WHERE applications.status NOT IN ({$completedPlaceholders})
@@ -36,8 +38,10 @@ class DashboardController extends Controller
                 SQL,
                 [
                     ApplicationStatus::Received->value,
+                    ApplicationStatus::Assigned->value,
                     ApplicationStatus::Processing->value,
                     ApplicationStatus::SupplementRequired->value,
+                    ApplicationStatus::PendingApproval->value,
                     ...$completedStatuses,
                     ...$completedStatuses,
                 ],
@@ -47,24 +51,40 @@ class DashboardController extends Controller
         $metrics = collect([
             'total',
             'received',
+            'assigned',
             'processing',
             'supplement_required',
+            'pending_approval',
             'completed',
             'overdue',
         ])->mapWithKeys(fn (string $key): array => [$key => (int) $aggregate->getAttribute($key)])->all();
 
+        // Staff có thêm số hồ sơ có thể nhận (claimable) — không nằm trong visibleTo nhưng vẫn thao tác được
+        $claimableCount = 0;
+        if ($actor->isStaff()) {
+            $claimableCount = Application::query()->claimableBy($actor)->count();
+        }
+
         $metricCards = [
             'total' => [
                 'label' => 'Tổng hồ sơ',
-                'description' => 'Tất cả hồ sơ trong phạm vi bạn được phép xem.',
+                'description' => $actor->isStaff()
+                    ? 'Tổng hồ sơ đã được gán cho bạn (chưa tính hồ sơ có thể nhận).'
+                    : 'Tất cả hồ sơ trong phạm vi bạn được phép xem.',
                 'url' => route('admin.applications.index'),
                 'accent' => 'text-gray-950',
             ],
             'received' => [
                 'label' => 'Mới tiếp nhận',
-                'description' => 'Hồ sơ đã tiếp nhận và đang chờ bắt đầu xử lý.',
+                'description' => 'Hồ sơ đã tiếp nhận và đang chờ phân công.',
                 'url' => route('admin.applications.index', ['status' => ApplicationStatus::Received->value]),
                 'accent' => 'text-sky-700',
+            ],
+            'assigned' => [
+                'label' => 'Đã phân công',
+                'description' => 'Hồ sơ đã phân công và chờ bắt đầu xử lý.',
+                'url' => route('admin.applications.index', ['status' => ApplicationStatus::Assigned->value]),
+                'accent' => 'text-indigo-700',
             ],
             'processing' => [
                 'label' => 'Đang xử lý',
@@ -77,6 +97,12 @@ class DashboardController extends Controller
                 'description' => 'Hồ sơ đang chờ công dân bổ sung thông tin hoặc tài liệu.',
                 'url' => route('admin.applications.index', ['status' => ApplicationStatus::SupplementRequired->value]),
                 'accent' => 'text-amber-700',
+            ],
+            'pending_approval' => [
+                'label' => 'Chờ duyệt',
+                'description' => 'Hồ sơ đã gửi chờ quản lý duyệt.',
+                'url' => route('admin.applications.index', ['status' => ApplicationStatus::PendingApproval->value]),
+                'accent' => 'text-purple-700',
             ],
             'completed' => [
                 'label' => 'Đã hoàn thành',
@@ -92,6 +118,6 @@ class DashboardController extends Controller
             ],
         ];
 
-        return view('admin.dashboard', compact('metricCards', 'metrics'));
+        return view('admin.dashboard', compact('metricCards', 'metrics', 'claimableCount'));
     }
 }

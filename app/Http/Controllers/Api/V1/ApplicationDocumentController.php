@@ -44,7 +44,16 @@ class ApplicationDocumentController extends Controller
             return ApiResponse::error('Document file is missing', status: 404);
         }
 
-        return Storage::disk($document->disk)->download(
+        $disk = Storage::disk($document->disk);
+
+        if (request()->boolean('inline') && in_array($document->mime_type, ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'], true)) {
+            return $disk->response($document->path, $document->original_name, [
+                'Content-Type' => $document->mime_type ?: 'application/octet-stream',
+                'Content-Disposition' => 'inline; filename="'.$document->original_name.'"',
+            ]);
+        }
+
+        return $disk->download(
             $document->path,
             $document->original_name,
             ['Content-Type' => $document->mime_type],

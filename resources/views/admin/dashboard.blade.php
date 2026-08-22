@@ -10,6 +10,13 @@
         </p>
     </div>
 
+    @if (!empty($claimableCount) && $claimableCount > 0)
+        <div class="mb-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800" role="status">
+            Bạn có <strong>{{ number_format($claimableCount) }}</strong> hồ sơ chưa gán trong phòng ban có thể nhận xử lý.
+            <a href="{{ route('admin.applications.index') }}#claimable" class="font-semibold underline hover:text-blue-900">Xem ngay</a>
+        </div>
+    @endif
+
     <section
         class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
         aria-labelledby="application-metrics-title"

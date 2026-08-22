@@ -38,7 +38,9 @@ export default function ServiceCatalog() {
         fetchServices({ search: debouncedSearch, category_id: selectedCategory?.id || '' })
             .then((res) => {
                 if (isMounted) {
-                    setServices(res.data.data);
+                    const payload = res.data?.data;
+                    const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
+                    setServices(Array.isArray(list) ? list : []);
                     setLoading(false);
                 }
             })

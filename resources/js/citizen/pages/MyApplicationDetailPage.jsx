@@ -33,6 +33,7 @@ export default function MyApplicationDetailPage() {
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
+    const [previewDoc, setPreviewDoc] = useState(null);
 
     const isEditable = application?.status === 'received';
     const canUpload = application?.status === 'received' || application?.status === 'supplement_required';
@@ -208,6 +209,14 @@ export default function MyApplicationDetailPage() {
 
     function removeFile(entry) {
         setFiles((current) => current.filter((item) => item !== entry));
+    }
+
+    function isPreviewable(doc) {
+        return ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(doc.mime_type);
+    }
+
+    function getPreviewUrl(doc) {
+        return `/api/v1/applications/${id}/documents/${doc.id}?inline=1`;
     }
 
     if (loading) {
@@ -424,6 +433,15 @@ export default function MyApplicationDetailPage() {
                                                         </div>
                                                     </div>
                                                     <div className="flex shrink-0 items-center gap-2">
+                                                        {isPreviewable(document) && (
+                                                            <button
+                                                                type="button"
+                                                                className="rounded-lg px-4 py-2 text-sm font-semibold text-primary transition hover:bg-blue-50"
+                                                                onClick={() => setPreviewDoc(document)}
+                                                            >
+                                                                {t('common.preview') ?? 'Xem'}
+                                                            </button>
+                                                        )}
                                                         <button
                                                             type="button"
                                                             className="rounded-lg px-4 py-2 text-sm font-semibold text-primary transition hover:bg-blue-50"
@@ -499,6 +517,31 @@ export default function MyApplicationDetailPage() {
                         <p className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-danger">{message}</p>
                     )}
                 </div>
+
+                {previewDoc && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setPreviewDoc(null)}>
+                        <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                                <div className="min-w-0">
+                                    <h3 className="truncate text-lg font-bold text-gray-900">{previewDoc.original_name}</h3>
+                                    <p className="text-xs text-gray-500">{previewDoc.requirement_label || previewDoc.mime_type}</p>
+                                </div>
+                                <button type="button" className="ml-4 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-2xl text-gray-500 hover:bg-gray-100" onClick={() => setPreviewDoc(null)} aria-label="Đóng">×</button>
+                            </div>
+                            <div className="flex-1 overflow-auto bg-gray-100 p-2">
+                                {previewDoc.mime_type === 'application/pdf' ? (
+                                    <iframe src={getPreviewUrl(previewDoc)} title={previewDoc.original_name} className="h-[75vh] w-full rounded-lg border border-gray-200 bg-white" />
+                                ) : (
+                                    <img src={getPreviewUrl(previewDoc)} alt={previewDoc.original_name} className="mx-auto max-h-[75vh] w-auto rounded-lg object-contain" />
+                                )}
+                            </div>
+                            <div className="flex justify-end gap-3 border-t border-gray-200 bg-white px-6 py-4">
+                                <button type="button" className="rounded-xl border border-gray-200 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50" onClick={() => setPreviewDoc(null)}>{t('common.close') ?? 'Đóng'}</button>
+                                <button type="button" className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover" onClick={() => downloadApplicationDocument(id, previewDoc.id, previewDoc.original_name)}>{t('common.download')}</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <Footer />
             </div>

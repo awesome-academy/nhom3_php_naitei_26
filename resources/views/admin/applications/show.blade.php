@@ -37,6 +37,12 @@
         </div>
     @endif
 
+    @if ($application->status->value === 'pending_approval')
+        <div class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+            Hồ sơ đang <span class="font-semibold">chờ quản lý duyệt</span> — Staff đã gửi kết quả/đề xuất. Quản lý có thể duyệt, từ chối hoặc trả về xử lý lại.
+        </div>
+    @endif
+
     @if ($application->status->value === 'supplement_required')
         @php
             $missingDocs = $application->missingRequiredDocuments();
@@ -75,18 +81,18 @@
                 <h2 id="application-info-title" class="admin-card-title">Thông tin hồ sơ</h2>
                 <div class="admin-card-body">
                     <dl class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-                        <div class="min-w-0">
+                        <div class="min-w-0 overflow-hidden">
                             <dt class="text-[13px] font-medium text-gray-500">Mã hồ sơ</dt>
-                            <dd class="mt-0.5 break-words font-medium text-gray-950">{{ $application->application_code }}</dd>
+                            <dd class="mt-0.5 break-all font-medium text-gray-950 [overflow-wrap:anywhere]">{{ $application->application_code }}</dd>
                         </div>
-                        <div class="min-w-0">
+                        <div class="min-w-0 overflow-hidden">
                             <dt class="text-[13px] font-medium text-gray-500">Trạng thái</dt>
-                            <dd class="mt-0.5 break-words">{{ $application->status->label() }}</dd>
+                            <dd class="mt-0.5 break-all [overflow-wrap:anywhere]">{{ $application->status->label() }}</dd>
                         </div>
-                        <div class="min-w-0">
+                        <div class="min-w-0 overflow-hidden">
                             <dt class="text-[13px] font-medium text-gray-500">Công dân</dt>
-                            <dd class="mt-0.5 flex flex-wrap items-center gap-2 break-words font-medium text-gray-950">
-                                <span class="break-words">{{ $citizen?->name ?: 'Không còn thông tin' }}</span>
+                            <dd class="mt-0.5 flex flex-wrap items-center gap-2 break-all font-medium text-gray-950 [overflow-wrap:anywhere]">
+                                <span class="break-all [overflow-wrap:anywhere]">{{ $citizen?->name ?: 'Không còn thông tin' }}</span>
                                 @if ($citizen?->trashed())
                                     <x-admin.badge variant="neutral">Đã lưu trữ</x-admin.badge>
                                 @elseif ($citizen && ! $citizen->is_active)
@@ -137,9 +143,9 @@
                     @if (filled($application->form_data))
                         <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             @foreach ($application->form_data as $key => $value)
-                                <div class="rounded-lg border border-border bg-gray-50 px-3 py-2">
-                                    <dt class="text-[13px] font-medium text-gray-500">{{ str_replace('_', ' ', (string) $key) }}</dt>
-                                    <dd class="mt-1 break-words text-sm font-medium text-gray-900">
+                                <div class="min-w-0 overflow-hidden rounded-lg border border-border bg-gray-50 px-3 py-2">
+                                    <dt class="truncate text-[13px] font-medium text-gray-500" title="{{ (string) $key }}">{{ str_replace('_', ' ', (string) $key) }}</dt>
+                                    <dd class="mt-1 break-all text-sm font-medium text-gray-900 [overflow-wrap:anywhere]">
                                         {{ is_scalar($value) || $value === null
                                             ? ($value ?? '—')
                                             : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}
@@ -154,19 +160,19 @@
             </section>
 
             @if ($application->result_note || $application->rejection_reason)
-                <section class="admin-card" aria-labelledby="application-result-title">
+                <section class="admin-card overflow-hidden" aria-labelledby="application-result-title">
                     <h2 id="application-result-title" class="admin-card-title">Kết quả xử lý</h2>
                     <div class="admin-card-body space-y-3">
                         @if ($application->result_note)
-                            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                            <div class="overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                                 <p class="text-[13px] font-semibold text-emerald-800">Ghi chú kết quả</p>
-                                <p class="mt-1 break-words text-sm text-emerald-900 whitespace-pre-wrap">{{ $application->result_note }}</p>
+                                <p class="mt-1 break-all text-sm text-emerald-900 whitespace-pre-wrap [overflow-wrap:anywhere]">{{ $application->result_note }}</p>
                             </div>
                         @endif
                         @if ($application->rejection_reason)
-                            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                            <div class="overflow-hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3">
                                 <p class="text-[13px] font-semibold text-red-800">Lý do từ chối</p>
-                                <p class="mt-1 break-words text-sm text-red-900 whitespace-pre-wrap">{{ $application->rejection_reason }}</p>
+                                <p class="mt-1 break-all text-sm text-red-900 whitespace-pre-wrap [overflow-wrap:anywhere]">{{ $application->rejection_reason }}</p>
                             </div>
                         @endif
                     </div>
@@ -216,8 +222,16 @@
                                 : ($unassigned
                                     ? 'Hồ sơ chưa có người phụ trách. Bạn có thể nhận xử lý nếu thuộc phòng ban phụ trách dịch vụ.'
                                     : 'Hồ sơ đã được gán cho cán bộ khác. Bạn không thể thao tác hồ sơ này.'),
-                            'processing' => 'Bạn đang xử lý hồ sơ. Có thể yêu cầu bổ sung tài liệu, duyệt hoặc từ chối.',
+                            'assigned' => $assignedToMe
+                                ? 'Hồ sơ đã được phân công cho bạn. Hãy bắt đầu xử lý.'
+                                : 'Hồ sơ đã được phân công cho cán bộ khác.',
+                            'processing' => $assignedToMe
+                                ? 'Bạn đang xử lý hồ sơ. Có thể yêu cầu bổ sung hoặc gửi kết quả chờ quản lý duyệt.'
+                                : 'Hồ sơ đang được cán bộ khác xử lý.',
                             'supplement_required' => 'Đang chờ công dân nộp tài liệu bổ sung. Khi đã đủ tài liệu, hãy tiếp tục xử lý.',
+                            'pending_approval' => auth()->user()?->isManager() || auth()->user()?->isSuperAdmin()
+                                ? 'Hồ sơ đang chờ bạn duyệt. Có thể duyệt, từ chối hoặc trả về xử lý lại.'
+                                : 'Hồ sơ đã gửi chờ quản lý duyệt.',
                             'approved' => 'Hồ sơ đã được duyệt và hoàn tất.',
                             'rejected' => 'Hồ sơ đã bị từ chối và hoàn tất.',
                             default => null,
@@ -241,14 +255,20 @@
 
                     @can('assign', $application)
                         @if (! $isTerminal)
-                            <x-admin.button type="button" data-dialog-open="assign-application-{{ $application->id }}" class="w-full">
-                                Phân công / đổi cán bộ
-                            </x-admin.button>
+                            @if ($application->assigned_staff_id === null)
+                                <x-admin.button type="button" data-dialog-open="assign-application-{{ $application->id }}" class="w-full">
+                                    Phân công cán bộ
+                                </x-admin.button>
+                            @else
+                                <x-admin.button type="button" variant="secondary" data-dialog-open="reassign-application-{{ $application->id }}" class="w-full">
+                                    Đổi cán bộ xử lý
+                                </x-admin.button>
+                            @endif
                         @endif
                     @endcan
 
                     @can('startProcessing', $application)
-                        @if ($status === 'received' && $assignedToMe)
+                        @if (in_array($status, ['received', 'assigned'], true) && $assignedToMe)
                             <form method="POST" action="{{ route('admin.applications.start-processing', $application) }}">
                                 @csrf
                                 <x-admin.button type="submit" class="w-full">Bắt đầu xử lý</x-admin.button>
@@ -273,8 +293,24 @@
                         @endif
                     @endcan
 
-                    @can('approve', $application)
+                    @can('submitForApproval', $application)
                         @if ($status === 'processing' && $assignedToMe)
+                            <x-admin.button type="button" data-dialog-open="submit-for-approval-{{ $application->id }}" class="w-full">
+                                Gửi duyệt
+                            </x-admin.button>
+                        @endif
+                    @endcan
+
+                    @can('returnToProcessing', $application)
+                        @if ($status === 'pending_approval')
+                            <x-admin.button type="button" variant="secondary" data-dialog-open="return-application-{{ $application->id }}" class="w-full">
+                                Trả về xử lý lại
+                            </x-admin.button>
+                        @endif
+                    @endcan
+
+                    @can('approve', $application)
+                        @if ($status === 'pending_approval')
                             <x-admin.button type="button" variant="secondary" data-dialog-open="approve-application-{{ $application->id }}" class="w-full">
                                 Duyệt hồ sơ
                             </x-admin.button>
@@ -282,7 +318,7 @@
                     @endcan
 
                     @can('reject', $application)
-                        @if ($status === 'processing' && $assignedToMe)
+                        @if ($status === 'pending_approval')
                             <x-admin.button type="button" variant="danger" data-dialog-open="reject-application-{{ $application->id }}" class="w-full">
                                 Từ chối hồ sơ
                             </x-admin.button>
@@ -301,60 +337,128 @@
         </aside>
     </div>
 
+    @php
+        $docsByKind = $application->documents->groupBy(fn ($d) => $d->document_kind?->value ?? 'other');
+        $submissionDocs = $docsByKind->get('submission', collect());
+        $supplementDocs = $docsByKind->get('supplement', collect());
+        $resultDocs = $docsByKind->get('result', collect());
+    @endphp
+
     <section class="admin-card mt-6" aria-labelledby="documents-title">
         <h2 id="documents-title" class="admin-card-title">Tài liệu hồ sơ</h2>
-        <div class="admin-card-body">
-            <div class="grid gap-3 md:grid-cols-2">
-                @forelse ($application->documents as $document)
-                    <article class="rounded-lg border border-border bg-white px-4 py-3">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                <p class="break-words text-sm font-semibold text-gray-950">{{ $document->original_name }}</p>
-                                <p class="mt-1 text-xs text-gray-500">
-                                    {{ $document->requirement_label ?: match ($document->document_kind?->value) {
-                                        'submission' => 'Tài liệu nộp ban đầu',
-                                        'supplement' => 'Tài liệu bổ sung',
-                                        'result' => 'Tài liệu kết quả',
-                                        default => 'Tài liệu hồ sơ',
-                                    } }}
-                                </p>
-                            </div>
-                            <div class="flex shrink-0 items-center gap-2">
-                                @php
-                                    $previewable = in_array($document->mime_type, ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'], true);
-                                @endphp
-                                @if ($previewable)
-                                    <button type="button" class="text-sm font-semibold text-primary hover:underline" data-dialog-open="preview-document-{{ $application->id }}-{{ $document->id }}">Xem</button>
+        <div class="admin-card-body space-y-6">
+            {{-- Tài liệu nộp ban đầu --}}
+            <div>
+                <h3 class="mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">Tài liệu nộp ban đầu (submission)</h3>
+                @if ($submissionDocs->isEmpty())
+                    <p class="rounded-lg border border-dashed border-border bg-gray-50 px-4 py-3 text-sm text-gray-500">Chưa có tài liệu nộp ban đầu.</p>
+                @else
+                    <div class="grid gap-3 md:grid-cols-2">
+                        @foreach ($submissionDocs as $document)
+                            <article class="overflow-hidden rounded-lg border border-border bg-white px-4 py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="break-all text-sm font-semibold text-gray-950 [overflow-wrap:anywhere]">{{ $document->original_name }}</p>
+                                        <p class="mt-1 break-all text-xs text-gray-500 [overflow-wrap:anywhere]">{{ $document->requirement_label ?: 'Tài liệu nộp ban đầu' }}</p>
+                                    </div>
+                                    <div class="flex shrink-0 items-center gap-2">
+                                        @php $previewable = in_array($document->mime_type, ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'], true); @endphp
+                                        @if ($previewable)
+                                            <button type="button" class="text-sm font-semibold text-primary hover:underline" data-dialog-open="preview-document-{{ $application->id }}-{{ $document->id }}">Xem</button>
+                                        @endif
+                                        @can('download', $document)
+                                            <a class="text-sm font-semibold text-primary hover:underline" href="{{ route('admin.applications.documents.download', [$application, $document]) }}">Tải xuống</a>
+                                        @endcan
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 break-all text-xs text-gray-500 [overflow-wrap:anywhere]">
+                                    <span>{{ $document->mime_type ?: 'Không rõ' }}</span>
+                                    @if ($document->file_size)<span>{{ number_format($document->file_size / 1024, 1) }} KB</span>@endif
+                                    <span>{{ $document->created_at?->format('d/m/Y H:i') }}</span>
+                                </div>
+                                @if ($document->uploader)
+                                    <p class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600"><span>Tải lên bởi {{ $document->uploader->name }}</span></p>
                                 @endif
-                                @can('download', $document)
-                                    <a class="text-sm font-semibold text-primary hover:underline"
-                                       href="{{ route('admin.applications.documents.download', [$application, $document]) }}">
-                                        Tải xuống
-                                    </a>
-                                @endcan
-                            </div>
-                        </div>
-                        <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
-                            <span>{{ $document->mime_type ?: 'Không rõ định dạng' }}</span>
-                            @if ($document->file_size)
-                                <span>{{ number_format($document->file_size / 1024, 1) }} KB</span>
-                            @endif
-                            <span>{{ $document->created_at?->format('d/m/Y H:i') }}</span>
-                        </div>
-                        @if ($document->uploader)
-                            <p class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-                                <span>Tải lên bởi {{ $document->uploader->name }}</span>
-                                @if ($document->uploader->trashed())
-                                    <x-admin.badge variant="neutral">Đã lưu trữ</x-admin.badge>
-                                @elseif (! $document->uploader->is_active)
-                                    <x-admin.badge variant="warning">Đã vô hiệu hóa</x-admin.badge>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- Tài liệu bổ sung --}}
+            <div>
+                <h3 class="mb-2 text-xs font-bold uppercase tracking-widest text-amber-600">Tài liệu bổ sung (supplement) — citizen nộp thêm khi được yêu cầu</h3>
+                @if ($supplementDocs->isEmpty())
+                    <p class="rounded-lg border border-dashed border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">Chưa có tài liệu bổ sung. Citizen sẽ nộp ở trang chi tiết hồ sơ khi ở trạng thái Chờ bổ sung.</p>
+                @else
+                    <div class="grid gap-3 md:grid-cols-2">
+                        @foreach ($supplementDocs as $document)
+                            <article class="overflow-hidden rounded-lg border border-amber-200 bg-amber-50/60 px-4 py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="break-all text-sm font-semibold text-gray-950 [overflow-wrap:anywhere]">{{ $document->original_name }}</p>
+                                        <p class="mt-1 break-all text-xs text-amber-700 [overflow-wrap:anywhere]">{{ $document->requirement_label ?: 'Tài liệu bổ sung' }}</p>
+                                    </div>
+                                    <div class="flex shrink-0 items-center gap-2">
+                                        @php $previewable = in_array($document->mime_type, ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'], true); @endphp
+                                        @if ($previewable)
+                                            <button type="button" class="text-sm font-semibold text-primary hover:underline" data-dialog-open="preview-document-{{ $application->id }}-{{ $document->id }}">Xem</button>
+                                        @endif
+                                        @can('download', $document)
+                                            <a class="text-sm font-semibold text-primary hover:underline" href="{{ route('admin.applications.documents.download', [$application, $document]) }}">Tải xuống</a>
+                                        @endcan
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 break-all text-xs text-gray-500 [overflow-wrap:anywhere]">
+                                    <span>{{ $document->mime_type ?: 'Không rõ' }}</span>
+                                    @if ($document->file_size)<span>{{ number_format($document->file_size / 1024, 1) }} KB</span>@endif
+                                    <span>{{ $document->created_at?->format('d/m/Y H:i') }}</span>
+                                </div>
+                                @if ($document->uploader)
+                                    <p class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600"><span>Tải lên bởi {{ $document->uploader->name }}</span></p>
                                 @endif
-                            </p>
-                        @endif
-                    </article>
-                @empty
-                    <p class="text-sm text-gray-600">Chưa có tài liệu.</p>
-                @endforelse
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- Tài liệu kết quả --}}
+            <div>
+                <h3 class="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-600">Tài liệu kết quả (result) — tách riêng để manager duyệt</h3>
+                @if ($resultDocs->isEmpty())
+                    <p class="rounded-lg border border-dashed border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">Chưa có tài liệu kết quả. Staff đính kèm khi ở trạng thái Đang xử lý, manager duyệt trước khi gửi cho citizen.</p>
+                @else
+                    <div class="grid gap-3 md:grid-cols-2">
+                        @foreach ($resultDocs as $document)
+                            <article class="overflow-hidden rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="break-all text-sm font-semibold text-gray-950 [overflow-wrap:anywhere]">{{ $document->original_name }}</p>
+                                        <p class="mt-1 break-all text-xs text-emerald-700 [overflow-wrap:anywhere]">{{ $document->requirement_label ?: 'Tài liệu kết quả' }}</p>
+                                    </div>
+                                    <div class="flex shrink-0 items-center gap-2">
+                                        @php $previewable = in_array($document->mime_type, ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'], true); @endphp
+                                        @if ($previewable)
+                                            <button type="button" class="text-sm font-semibold text-primary hover:underline" data-dialog-open="preview-document-{{ $application->id }}-{{ $document->id }}">Xem</button>
+                                        @endif
+                                        @can('download', $document)
+                                            <a class="text-sm font-semibold text-primary hover:underline" href="{{ route('admin.applications.documents.download', [$application, $document]) }}">Tải xuống</a>
+                                        @endcan
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 break-all text-xs text-gray-500 [overflow-wrap:anywhere]">
+                                    <span>{{ $document->mime_type ?: 'Không rõ' }}</span>
+                                    @if ($document->file_size)<span>{{ number_format($document->file_size / 1024, 1) }} KB</span>@endif
+                                    <span>{{ $document->created_at?->format('d/m/Y H:i') }}</span>
+                                </div>
+                                @if ($document->uploader)
+                                    <p class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600"><span>Tải lên bởi {{ $document->uploader->name }}</span></p>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
     </section>
@@ -449,34 +553,68 @@
 
     @can('assign', $application)
         @if (! in_array($application->status->value, ['approved', 'rejected'], true))
-            <x-admin.dialog
-                id="assign-application-{{ $application->id }}"
-                title="Phân công cán bộ xử lý"
-                description="Chọn staff đang hoạt động thuộc phòng ban phụ trách dịch vụ của hồ sơ."
-                data-open-on-error="{{ $errors->has('staff_id') ? 'true' : 'false' }}"
-            >
-            <form method="POST" action="{{ route('admin.applications.assign', $application) }}" class="space-y-4">
-                @csrf
-                <div>
-                    <label class="admin-label" for="assign-staff-{{ $application->id }}">Cán bộ xử lý</label>
-                    <select id="assign-staff-{{ $application->id }}" class="admin-select" name="staff_id" required>
-                        <option value="">Chọn cán bộ…</option>
-                        @foreach ($application->serviceType?->responsibleDepartment?->users?->filter(fn ($user) => $user->isStaff() && $user->canAccessProtectedResources()) ?? [] as $candidate)
-                            <option value="{{ $candidate->id }}" @selected(old('staff_id') == $candidate->id)>{{ $candidate->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('staff_id')<p class="admin-field-error">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="admin-label" for="assign-note-{{ $application->id }}">Ghi chú (tùy chọn)</label>
-                    <textarea id="assign-note-{{ $application->id }}" class="admin-input" name="note" rows="2" maxlength="1000">{{ old('note') }}</textarea>
-                </div>
-                <div class="flex justify-end gap-2 border-t border-border pt-4">
-                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
-                    <x-admin.button type="submit">Phân công</x-admin.button>
-                </div>
-            </form>
-        </x-admin.dialog>
+            @if ($application->assigned_staff_id === null)
+                <x-admin.dialog
+                    id="assign-application-{{ $application->id }}"
+                    title="Phân công cán bộ xử lý"
+                    description="Chọn staff đang hoạt động thuộc phòng ban phụ trách dịch vụ của hồ sơ. Hồ sơ chưa có người phụ trách nên ghi chú là tùy chọn."
+                    data-open-on-error="{{ $errors->has('staff_id') ? 'true' : 'false' }}"
+                >
+                <form method="POST" action="{{ route('admin.applications.assign', $application) }}" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="admin-label" for="assign-staff-{{ $application->id }}">Cán bộ xử lý</label>
+                        <select id="assign-staff-{{ $application->id }}" class="admin-select" name="staff_id" required>
+                            <option value="">Chọn cán bộ…</option>
+                            @foreach ($application->serviceType?->responsibleDepartment?->users?->filter(fn ($user) => $user->isStaff() && $user->canAccessProtectedResources()) ?? [] as $candidate)
+                                <option value="{{ $candidate->id }}" @selected(old('staff_id') == $candidate->id)>{{ $candidate->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('staff_id')<p class="admin-field-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="admin-label" for="assign-note-{{ $application->id }}">Ghi chú (tùy chọn)</label>
+                        <textarea id="assign-note-{{ $application->id }}" class="admin-input" name="note" rows="2" maxlength="1000" placeholder="Ghi chú phân công (không bắt buộc)">{{ old('note') }}</textarea>
+                        @error('note')<p class="admin-field-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="flex justify-end gap-2 border-t border-border pt-4">
+                        <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                        <x-admin.button type="submit">Phân công</x-admin.button>
+                    </div>
+                </form>
+            </x-admin.dialog>
+            @else
+                <x-admin.dialog
+                    id="reassign-application-{{ $application->id }}"
+                    title="Đổi cán bộ xử lý"
+                    description="Hồ sơ đã có người phụ trách. Vui lòng chọn cán bộ khác và nhập lý do đổi (bắt buộc). Không thể chọn lại chính cán bộ đang xử lý."
+                    data-open-on-error="{{ $errors->has('staff_id') || $errors->has('note') ? 'true' : 'false' }}"
+                >
+                <form method="POST" action="{{ route('admin.applications.assign', $application) }}" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="admin-label" for="reassign-staff-{{ $application->id }}">Cán bộ mới <span class="text-danger">*</span></label>
+                        <select id="reassign-staff-{{ $application->id }}" class="admin-select" name="staff_id" required>
+                            <option value="">Chọn cán bộ khác…</option>
+                            @foreach ($application->serviceType?->responsibleDepartment?->users?->filter(fn ($user) => $user->isStaff() && $user->canAccessProtectedResources() && $user->id !== $application->assigned_staff_id) ?? [] as $candidate)
+                                <option value="{{ $candidate->id }}" @selected(old('staff_id') == $candidate->id)>{{ $candidate->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('staff_id')<p class="admin-field-error">{{ $message }}</p>@enderror
+                        <p class="mt-1 text-xs text-gray-500">Đang xử lý: {{ $application->historicalAssignedStaff?->name ?? '—' }} — không thể chọn lại.</p>
+                    </div>
+                    <div>
+                        <label class="admin-label" for="reassign-note-{{ $application->id }}">Lý do đổi cán bộ <span class="text-danger">*</span></label>
+                        <textarea id="reassign-note-{{ $application->id }}" class="admin-input" name="note" rows="3" maxlength="1000" required placeholder="Nhập lý do đổi người xử lý (bắt buộc)">{{ old('note') }}</textarea>
+                        @error('note')<p class="admin-field-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="flex justify-end gap-2 border-t border-border pt-4">
+                        <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                        <x-admin.button type="submit">Xác nhận đổi</x-admin.button>
+                    </div>
+                </form>
+            </x-admin.dialog>
+            @endif
         @endif
     @endcan
 
@@ -504,8 +642,56 @@
         @endif
     @endcan
 
-    @can('approve', $application)
+    @can('submitForApproval', $application)
         @if ($application->status->value === 'processing')
+            <x-admin.dialog
+                id="submit-for-approval-{{ $application->id }}"
+                title="Gửi duyệt"
+                description="Hồ sơ sẽ chuyển sang chờ quản lý duyệt (có thể duyệt, từ chối hoặc trả về)."
+                data-open-on-error="{{ $errors->has('note') ? 'true' : 'false' }}"
+            >
+            <form method="POST" action="{{ route('admin.applications.submit-for-approval', $application) }}" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="admin-label" for="submit-note-{{ $application->id }}">Ghi chú gửi duyệt (tùy chọn)</label>
+                    <textarea id="submit-note-{{ $application->id }}" class="admin-input" name="note" rows="3" maxlength="2000">{{ old('note') }}</textarea>
+                    @error('note')<p class="admin-field-error">{{ $message }}</p>@enderror
+                </div>
+                <div class="flex justify-end gap-2 border-t border-border pt-4">
+                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                    <x-admin.button type="submit">Gửi duyệt</x-admin.button>
+                </div>
+            </form>
+        </x-admin.dialog>
+        @endif
+    @endcan
+
+    @can('returnToProcessing', $application)
+        @if ($application->status->value === 'pending_approval')
+            <x-admin.dialog
+                id="return-application-{{ $application->id }}"
+                title="Trả về xử lý lại"
+                description="Hồ sơ sẽ quay lại trạng thái đang xử lý để cán bộ tiếp tục xử lý."
+                data-open-on-error="{{ $errors->has('note') ? 'true' : 'false' }}"
+            >
+            <form method="POST" action="{{ route('admin.applications.return', $application) }}" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="admin-label" for="return-note-{{ $application->id }}">Lý do trả về</label>
+                    <textarea id="return-note-{{ $application->id }}" class="admin-input" name="note" rows="3" maxlength="2000" required>{{ old('note') }}</textarea>
+                    @error('note')<p class="admin-field-error">{{ $message }}</p>@enderror
+                </div>
+                <div class="flex justify-end gap-2 border-t border-border pt-4">
+                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                    <x-admin.button type="submit" variant="secondary">Xác nhận trả về</x-admin.button>
+                </div>
+            </form>
+        </x-admin.dialog>
+        @endif
+    @endcan
+
+    @can('approve', $application)
+        @if ($application->status->value === 'pending_approval')
             <x-admin.dialog
                 id="approve-application-{{ $application->id }}"
                 title="Duyệt hồ sơ"
@@ -529,7 +715,7 @@
     @endcan
 
     @can('reject', $application)
-        @if ($application->status->value === 'processing')
+        @if ($application->status->value === 'pending_approval')
             <x-admin.dialog
                 id="reject-application-{{ $application->id }}"
                 title="Từ chối hồ sơ"
@@ -582,12 +768,14 @@
                 id="preview-document-{{ $application->id }}-{{ $document->id }}"
                 title="Xem trước tài liệu"
                 description="{{ $document->original_name }}"
+                size="4xl"
             >
                 <div class="space-y-3">
                     <iframe
-                        class="h-[70vh] w-full rounded-lg border border-border bg-gray-100"
+                        class="h-[80vh] max-h-[75vh] w-full rounded-lg border border-border bg-gray-100"
                         data-src="{{ route('admin.applications.documents.download', [$application, $document]) }}?inline=1"
                         title="{{ $document->original_name }}"
+                        loading="lazy"
                     ></iframe>
                     <div class="flex justify-end gap-2 border-t border-border pt-4">
                         <x-admin.button variant="secondary" data-dialog-close>Đóng</x-admin.button>
