@@ -165,11 +165,21 @@
     }
 
     .admin-card {
-        @apply rounded-2xl border border-border bg-white shadow-sm;
+        @apply rounded-2xl border border-border bg-white shadow-sm overflow-hidden;
+    }
+
+    .admin-card-title {
+        @apply border-b border-border bg-gray-50 px-5 py-3.5 text-sm font-bold tracking-tight text-gray-900;
     }
 
     .admin-card-body {
         @apply p-4 sm:p-5;
+    }
+
+    .admin-card-body dl,
+    .admin-card-body dd,
+    .admin-card-body dt {
+        @apply min-w-0;
     }
 
     .admin-table-wrap {

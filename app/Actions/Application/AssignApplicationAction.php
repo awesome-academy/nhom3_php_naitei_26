@@ -72,6 +72,12 @@ final readonly class AssignApplicationAction
                 ]);
             }
 
+            if ($locked->assigned_staff_id !== null && (int) $locked->assigned_staff_id === (int) $lockedStaff->getKey()) {
+                throw ValidationException::withMessages([
+                    'staff_id' => 'Không thể đổi cho chính cán bộ đang xử lý hồ sơ này.',
+                ]);
+            }
+
             $this->closeActiveAssignments($locked);
 
             ApplicationAssignment::query()->create([
