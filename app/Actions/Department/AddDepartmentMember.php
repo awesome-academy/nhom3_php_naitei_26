@@ -29,26 +29,14 @@ final readonly class AddDepartmentMember
                 Gate::forUser($actor)->authorize('addMember', $lockedDepartment);
                 $this->ensureCurrentVersion($lockedDepartment, $version);
 
-                $memberQuery = User::query()->lockForUpdate();
-                if ($actor->isSuperAdmin()) {
-                    $memberQuery->eligibleDepartmentMembers();
-                } else {
-                    $memberQuery->eligibleDepartmentStaff();
-                }
-                $member = $memberQuery->find($userId);
+                $member = User::query()
+                    ->availableDepartmentStaff()
+                    ->lockForUpdate()
+                    ->find($userId);
 
                 if (! $member) {
                     throw ValidationException::withMessages([
-                        'user_id' => 'Chỉ nhân viên hoặc quản lý đang hoạt động và phù hợp phạm vi mới có thể được thêm.',
-                    ]);
-                }
-
-                if (DB::table('department_user')
-                    ->where('department_id', $lockedDepartment->getKey())
-                    ->where('user_id', $member->getKey())
-                    ->exists()) {
-                    throw ValidationException::withMessages([
-                        'user_id' => 'Thành viên này đã thuộc phòng ban.',
+                        'user_id' => 'Chỉ nhân viên đang hoạt động và chưa được phân công vào phòng ban nào mới có thể được thêm.',
                     ]);
                 }
 
@@ -72,7 +60,7 @@ final readonly class AddDepartmentMember
             });
         } catch (UniqueConstraintViolationException) {
             throw ValidationException::withMessages([
-                'user_id' => 'Thành viên này đã thuộc phòng ban.',
+                'user_id' => 'Nhân viên này đã được phân công vào phòng ban.',
             ]);
         }
     }

@@ -122,6 +122,29 @@ class DepartmentTransferTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_legacy_staff_with_another_active_membership_cannot_be_assigned_to_a_new_department(): void
+    {
+        $actor = $this->superAdmin();
+        $staff = User::factory()->staff()->create();
+        $source = Department::factory()->create();
+        $legacyDepartment = Department::factory()->create();
+        $target = Department::factory()->create();
+        $source->users()->attach($staff);
+        $legacyDepartment->users()->attach($staff);
+
+        $this->actingAs($actor)
+            ->post(route('admin.departments.members.transfer', [$source, $staff]), [
+                'target_department_id' => $target->id,
+                'source_version' => 0,
+                'target_version' => 0,
+            ])
+            ->assertSessionHasErrors('member');
+
+        $this->assertTrue($source->users()->whereKey($staff->id)->exists());
+        $this->assertTrue($legacyDepartment->users()->whereKey($staff->id)->exists());
+        $this->assertFalse($target->users()->whereKey($staff->id)->exists());
+    }
+
     public function test_manager_must_lead_both_source_and_target(): void
     {
         $manager = User::factory()->manager()->create();

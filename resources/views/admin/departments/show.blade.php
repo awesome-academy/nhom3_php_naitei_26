@@ -22,10 +22,10 @@
                 <x-admin.button variant="secondary" data-dialog-open="change-department-leader">Đổi lãnh đạo</x-admin.button>
             @endcan
             @can('update', $department)
-                <x-admin.button variant="secondary" :href="route('admin.departments.edit', $department)">Chỉnh sửa</x-admin.button>
+                <x-admin.button variant="secondary" :href="route('admin.departments.edit', $department)">Sửa</x-admin.button>
             @endcan
             @can('archive', $department)
-                <x-admin.button variant="danger" data-dialog-open="archive-department">Lưu trữ phòng ban</x-admin.button>
+                <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-department">Xóa</x-admin.button>
             @endcan
         </div>
     </div>
@@ -42,8 +42,8 @@
         </div>
     @endif
 
-    <div class="grid gap-5 lg:grid-cols-3">
-        <section class="admin-card lg:col-span-2" aria-labelledby="department-information-title">
+    <div class="grid gap-5 lg:grid-cols-2">
+        <section class="admin-card" aria-labelledby="department-information-title">
             <div class="admin-card-body">
                 <h2 id="department-information-title" class="text-lg font-bold text-gray-950">Thông tin phòng ban</h2>
                 <dl class="mt-4 grid gap-4 sm:grid-cols-2">
@@ -164,60 +164,46 @@
                 method="POST"
                 action="{{ route('admin.departments.leader.update', $department) }}"
                 class="space-y-4"
-                x-data="candidateCombobox({
-                    url: @js(route('admin.departments.manager-candidates')),
-                    initial: @js($department->leader ? [
-                        'id' => $department->leader->id,
-                        'name' => $department->leader->name,
-                        'email' => $department->leader->email,
-                        'role' => $department->leader->role->value,
-                        'role_label' => $department->leader->role->label(),
-                    ] : null),
-                })"
-                @click.outside="close()"
+                x-data="{ leaderId: @js((string) old('leader_id', '')) }"
             >
                 @csrf
                 @method('PATCH')
                 <input type="hidden" name="version" value="{{ $department->lock_version }}">
-                <input type="hidden" name="leader_id" :value="selected?.id ?? ''">
+                <input type="hidden" name="leader_id" :value="leaderId">
 
                 <div>
-                    <label class="admin-label" for="leader-candidate-search">Quản lý phụ trách</label>
-                    <input
-                        id="leader-candidate-search"
-                        class="admin-input"
-                        type="search"
-                        x-model="query"
-                        @input.debounce.300ms="handleInput()"
-                        @keydown.arrow-down.prevent="move(1)"
-                        @keydown.arrow-up.prevent="move(-1)"
-                        @keydown.enter.prevent="chooseActive()"
-                        @keydown.escape="close()"
-                        role="combobox"
-                        aria-autocomplete="list"
-                        aria-controls="leader-candidate-options"
-                        :aria-expanded="open.toString()"
-                        autocomplete="off"
-                        placeholder="Nhập ít nhất 2 ký tự"
+                    <label class="admin-label" for="department-leader-select">Quản lý phụ trách</label>
+                    <select
+                        id="department-leader-select"
+                        class="admin-select"
+                        x-model="leaderId"
+                        @disabled($leaderCandidates->isEmpty())
                     >
-                    <div id="leader-candidate-options" x-show="open" x-cloak class="mt-1 max-h-56 overflow-y-auto rounded-xl border border-border p-1" role="listbox">
-                        <p x-show="loading" class="px-3 py-2 text-sm text-gray-500">Đang tìm kiếm...</p>
-                        <p x-show="error" x-text="error" class="px-3 py-2 text-sm text-danger"></p>
-                        <template x-for="(item, index) in items" :key="item.id">
-                            <button type="button" class="block w-full rounded-lg px-3 py-2 text-left hover:bg-blue-50" :class="activeIndex === index ? 'bg-blue-50' : ''" role="option" @mousedown.prevent="select(item)">
-                                <span class="block text-sm font-semibold" x-text="item.name"></span>
-                                <span class="block text-xs text-gray-500" x-text="item.email"></span>
-                            </button>
-                        </template>
-                    </div>
+                        <option value="">Chọn lãnh đạo phù hợp</option>
+                        @foreach ($leaderCandidates as $candidate)
+                            <option value="{{ $candidate->id }}">{{ $candidate->name }} — {{ $candidate->email }}</option>
+                        @endforeach
+                    </select>
+                    @if ($leaderCandidates->isEmpty())
+                        <p class="mt-1.5 text-sm text-gray-500">Đang chưa có lãnh đạo nào phù hợp.</p>
+                    @else
+                        <p class="mt-1.5 text-xs text-gray-500">Chỉ hiển thị quản lý đang hoạt động và chưa được phân công vào phòng ban nào.</p>
+                    @endif
                     @error('leader_id')<p class="admin-field-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
-                    <button type="button" class="text-sm font-semibold text-danger hover:underline" @click="clear()">Bỏ chỉ định lãnh đạo</button>
+                    <button
+                        type="submit"
+                        class="text-sm font-semibold text-danger hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="leaderId = ''"
+                        @disabled(! $department->leader_id)
+                    >
+                        Bỏ chỉ định lãnh đạo
+                    </button>
                     <div class="flex gap-2">
                         <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
-                        <x-admin.button type="submit">Lưu lãnh đạo</x-admin.button>
+                        <x-admin.button type="submit" x-bind:disabled="!leaderId">Lưu lãnh đạo</x-admin.button>
                     </div>
                 </div>
             </form>
@@ -254,53 +240,41 @@
         <x-admin.dialog
             id="add-department-member"
             title="Thêm thành viên"
-            description="Tìm tài khoản nội bộ phù hợp. Quản lý chỉ có thể thêm nhân viên."
+            description="Chọn nhân viên đang hoạt động và chưa được phân công vào phòng ban nào."
             data-open-on-error="{{ $errors->has('user_id') ? 'true' : 'false' }}"
         >
             <form
                 method="POST"
                 action="{{ route('admin.departments.members.store', $department) }}"
                 class="space-y-4"
-                x-data="candidateCombobox({ url: @js(route('admin.departments.member-candidates', $department)) })"
-                @click.outside="close()"
+                x-data="{ staffId: @js((string) old('user_id', '')) }"
             >
                 @csrf
                 <input type="hidden" name="version" value="{{ $department->lock_version }}">
-                <input type="hidden" name="user_id" :value="selected?.id ?? ''">
+                <input type="hidden" name="user_id" :value="staffId">
                 <div>
-                    <label class="admin-label" for="member-candidate-search">Nhân viên hoặc quản lý</label>
-                    <input
-                        id="member-candidate-search"
-                        class="admin-input"
-                        type="search"
-                        x-model="query"
-                        @input.debounce.300ms="handleInput()"
-                        @keydown.arrow-down.prevent="move(1)"
-                        @keydown.arrow-up.prevent="move(-1)"
-                        @keydown.enter.prevent="chooseActive()"
-                        @keydown.escape="close()"
-                        role="combobox"
-                        aria-autocomplete="list"
-                        aria-controls="member-candidate-options"
-                        :aria-expanded="open.toString()"
-                        autocomplete="off"
-                        placeholder="Nhập tên hoặc email"
+                    <label class="admin-label" for="department-staff-select">Nhân viên</label>
+                    <select
+                        id="department-staff-select"
+                        class="admin-select"
+                        x-model="staffId"
+                        @disabled($staffCandidates->isEmpty())
                     >
-                    <div id="member-candidate-options" x-show="open" x-cloak class="mt-1 max-h-56 overflow-y-auto rounded-xl border border-border p-1" role="listbox">
-                        <p x-show="loading" class="px-3 py-2 text-sm text-gray-500">Đang tìm kiếm...</p>
-                        <p x-show="error" x-text="error" class="px-3 py-2 text-sm text-danger"></p>
-                        <template x-for="(item, index) in items" :key="item.id">
-                            <button type="button" class="block w-full rounded-lg px-3 py-2 text-left hover:bg-blue-50" :class="activeIndex === index ? 'bg-blue-50' : ''" role="option" @mousedown.prevent="select(item)">
-                                <span class="block text-sm font-semibold" x-text="item.name"></span>
-                                <span class="block text-xs text-gray-500" x-text="`${item.email} · ${item.role_label}`"></span>
-                            </button>
-                        </template>
-                    </div>
+                        <option value="">Chọn nhân viên phù hợp</option>
+                        @foreach ($staffCandidates as $candidate)
+                            <option value="{{ $candidate->id }}">{{ $candidate->name }} — {{ $candidate->email }}</option>
+                        @endforeach
+                    </select>
+                    @if ($staffCandidates->isEmpty())
+                        <p class="mt-1.5 text-sm text-gray-500">Đang chưa có staff nào phù hợp.</p>
+                    @else
+                        <p class="mt-1.5 text-xs text-gray-500">Chỉ hiển thị Staff đang hoạt động và chưa được phân công vào phòng ban nào.</p>
+                    @endif
                     @error('user_id')<p class="admin-field-error">{{ $message }}</p>@enderror
                 </div>
                 <div class="flex justify-end gap-2 border-t border-border pt-4">
                     <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
-                    <x-admin.button type="submit" x-bind:disabled="!selected">Thêm thành viên</x-admin.button>
+                    <x-admin.button type="submit" x-bind:disabled="!staffId">Thêm thành viên</x-admin.button>
                 </div>
             </form>
         </x-admin.dialog>

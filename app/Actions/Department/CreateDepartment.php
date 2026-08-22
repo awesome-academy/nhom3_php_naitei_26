@@ -25,13 +25,13 @@ final readonly class CreateDepartment
                 $leaderId = $attributes['leader_id'] ?? null;
                 if ($leaderId !== null) {
                     $leader = User::query()
-                        ->eligibleDepartmentLeaders()
+                        ->availableDepartmentLeaders()
                         ->lockForUpdate()
                         ->find($leaderId);
 
                     if (! $leader) {
                         throw ValidationException::withMessages([
-                            'leader_id' => 'Chỉ quản lý đang hoạt động mới có thể làm lãnh đạo phòng ban.',
+                            'leader_id' => 'Chỉ quản lý đang hoạt động và chưa được phân công vào phòng ban nào mới có thể làm lãnh đạo.',
                         ]);
                     }
                 }

@@ -9,7 +9,7 @@
 </head>
 <body class="min-h-screen bg-admin-page font-inter text-slate-900">
     <header class="bg-primary text-white shadow-sm">
-        <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-2 py-2 sm:gap-x-5 sm:px-6 lg:px-8">
+        <div class="flex w-full flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:gap-x-4 xl:flex-nowrap">
             <a href="{{ route('admin.dashboard') }}" class="flex shrink-0 items-center gap-3 text-white">
                 <img
                     class="h-11 w-11 shrink-0 object-contain"
@@ -22,7 +22,7 @@
                 </span>
             </a>
 
-            <nav class="order-3 flex w-full min-w-0 flex-wrap items-center gap-1 md:order-none md:w-auto md:flex-1" aria-label="Điều hướng quản trị">
+            <nav class="order-3 flex w-full min-w-0 flex-wrap items-center justify-center gap-1 md:order-none md:w-auto md:flex-1 xl:flex-nowrap" aria-label="Điều hướng quản trị">
                 <a
                     href="{{ route('admin.dashboard') }}"
                     @class([
@@ -33,19 +33,6 @@
                 >
                     Tổng quan
                 </a>
-
-                @can('viewAny', \App\Models\Application::class)
-                    <a
-                        href="{{ route('admin.applications.index') }}"
-                        @class([
-                            'whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
-                            'bg-white/20 text-white' => request()->routeIs('admin.applications.*'),
-                            'text-white/65 hover:bg-white/10 hover:text-white' => ! request()->routeIs('admin.applications.*'),
-                        ])
-                    >
-                        Hồ sơ
-                    </a>
-                @endcan
 
                 @can('viewAny', \App\Models\Department::class)
                     <a

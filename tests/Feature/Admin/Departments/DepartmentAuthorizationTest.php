@@ -108,7 +108,14 @@ class DepartmentAuthorizationTest extends TestCase
             ->get(route('admin.departments.index'))
             ->assertOk()
             ->assertSee('Tạo phòng ban')
-            ->assertSee('Chỉnh sửa');
+            ->assertSee('Sửa')
+            ->assertSee('Xóa');
+
+        $this->actingAs($superAdmin)
+            ->get(route('admin.departments.show', $ledDepartment))
+            ->assertOk()
+            ->assertSee('Sửa')
+            ->assertSee('Xóa');
 
         $this->actingAs($manager)
             ->get(route('admin.departments.index'))
@@ -116,14 +123,16 @@ class DepartmentAuthorizationTest extends TestCase
             ->assertSee($ledDepartment->name)
             ->assertDontSee($outsideDepartment->name)
             ->assertDontSee('Tạo phòng ban')
-            ->assertDontSee('Chỉnh sửa');
+            ->assertDontSee('Sửa')
+            ->assertDontSee('Xóa');
 
         $this->actingAs($manager)
             ->get(route('admin.departments.show', $ledDepartment))
             ->assertOk()
             ->assertSee('Thêm thành viên')
             ->assertDontSee('Đổi lãnh đạo')
-            ->assertDontSee('Chỉnh sửa');
+            ->assertDontSee('Sửa')
+            ->assertDontSee('Xóa');
 
         $this->actingAs($manager)
             ->get(route('admin.departments.show', $outsideDepartment))

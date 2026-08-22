@@ -73,11 +73,26 @@ class User extends Authenticatable
             ->where('role', UserRole::Staff->value);
     }
 
+    public function scopeAvailableDepartmentStaff(Builder $query): Builder
+    {
+        return $query
+            ->eligibleDepartmentStaff()
+            ->whereDoesntHave('departments');
+    }
+
     public function scopeEligibleDepartmentLeaders(Builder $query): Builder
     {
         return $query
             ->where('is_active', true)
             ->where('role', UserRole::Manager->value);
+    }
+
+    public function scopeAvailableDepartmentLeaders(Builder $query): Builder
+    {
+        return $query
+            ->eligibleDepartmentLeaders()
+            ->whereDoesntHave('departments')
+            ->whereDoesntHave('ledDepartments');
     }
 
     public function submittedApplications(): HasMany

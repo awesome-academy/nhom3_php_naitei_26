@@ -101,7 +101,7 @@
             </div>
         @else
             <div class="admin-table-wrap rounded-none border-x-0 border-t-0" tabindex="0" aria-label="Bảng phòng ban có thể cuộn ngang">
-                <table class="admin-table min-w-[920px]">
+                <table class="admin-table w-full min-w-[920px]">
                     <caption class="sr-only">Danh sách phòng ban trong phạm vi được phép</caption>
                     <thead>
                         <tr>
@@ -141,14 +141,14 @@
                                         {{ $department->isArchived() ? 'Đã lưu trữ' : 'Hoạt động' }}
                                     </x-admin.badge>
                                 </td>
-                                <td>
+                                <td class="whitespace-nowrap">
                                     <div class="flex justify-end gap-2">
                                         <x-admin.button variant="ghost" :href="route('admin.departments.show', $department)">Chi tiết</x-admin.button>
                                         @can('update', $department)
-                                            <x-admin.button variant="secondary" :href="route('admin.departments.edit', $department)">Chỉnh sửa</x-admin.button>
+                                            <x-admin.button variant="secondary" :href="route('admin.departments.edit', $department)">Sửa</x-admin.button>
                                         @endcan
                                         @can('archive', $department)
-                                            <x-admin.button variant="danger" data-dialog-open="archive-department-{{ $department->id }}">Lưu trữ</x-admin.button>
+                                            <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-department-{{ $department->id }}">Xóa</x-admin.button>
                                         @endcan
                                     </div>
                                     @can('archive', $department)
