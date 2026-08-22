@@ -32,8 +32,10 @@ class ApplicationFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => $status,
             'processing_started_at' => in_array($status, [
+                ApplicationStatus::Assigned,
                 ApplicationStatus::Processing,
                 ApplicationStatus::SupplementRequired,
+                ApplicationStatus::PendingApproval,
                 ApplicationStatus::Approved,
                 ApplicationStatus::Rejected,
             ], true) ? now() : null,

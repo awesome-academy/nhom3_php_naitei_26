@@ -7,8 +7,10 @@ enum ApplicationStatus: string
     public const COMPLETED_FILTER = 'completed';
 
     case Received = 'received';
+    case Assigned = 'assigned';
     case Processing = 'processing';
     case SupplementRequired = 'supplement_required';
+    case PendingApproval = 'pending_approval';
     case Approved = 'approved';
     case Rejected = 'rejected';
 
@@ -16,8 +18,10 @@ enum ApplicationStatus: string
     {
         return match ($this) {
             self::Received => 'Mới tiếp nhận',
+            self::Assigned => 'Đã phân công',
             self::Processing => 'Đang xử lý',
-            self::SupplementRequired => 'Chờ bổ sung',
+            self::SupplementRequired => 'Yêu cầu bổ sung',
+            self::PendingApproval => 'Chờ duyệt',
             self::Approved => 'Đã duyệt',
             self::Rejected => 'Đã từ chối',
         };
@@ -29,7 +33,9 @@ enum ApplicationStatus: string
             self::Approved => 'success',
             self::Rejected => 'danger',
             self::SupplementRequired => 'warning',
+            self::PendingApproval => 'warning',
             self::Processing => 'info',
+            self::Assigned => 'info',
             self::Received => 'neutral',
         };
     }

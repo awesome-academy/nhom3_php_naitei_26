@@ -123,14 +123,69 @@ class ApplicationPolicy
         return $this->canProcess($user, $application);
     }
 
-    public function approve(User $user, Application $application): bool
+    public function submitForApproval(User $user, Application $application): bool
     {
         return $this->canProcess($user, $application);
     }
 
+    public function returnToProcessing(User $user, Application $application): bool
+    {
+        if (! $this->isActiveInternalUser($user) || $this->isTrashed($application)) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $user->isManager()) {
+            return false;
+        }
+
+        $departmentId = $application->serviceType?->responsible_department_id;
+
+        return $departmentId !== null
+            && $user->ledDepartments()->whereKey($departmentId)->exists();
+    }
+
+    public function approve(User $user, Application $application): bool
+    {
+        if (! $this->isActiveInternalUser($user) || $this->isTrashed($application)) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $user->isManager()) {
+            return false;
+        }
+
+        $departmentId = $application->serviceType?->responsible_department_id;
+
+        return $departmentId !== null
+            && $user->ledDepartments()->whereKey($departmentId)->exists();
+    }
+
     public function reject(User $user, Application $application): bool
     {
-        return $this->canProcess($user, $application);
+        if (! $this->isActiveInternalUser($user) || $this->isTrashed($application)) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $user->isManager()) {
+            return false;
+        }
+
+        $departmentId = $application->serviceType?->responsible_department_id;
+
+        return $departmentId !== null
+            && $user->ledDepartments()->whereKey($departmentId)->exists();
     }
 
     public function uploadResultDocument(User $user, Application $application): bool

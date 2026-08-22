@@ -14,14 +14,22 @@ final class ApplicationTransitionMap
     {
         return [
             ApplicationStatus::Received->value => [
+                ApplicationStatus::Assigned,
+                ApplicationStatus::Processing,
+            ],
+            ApplicationStatus::Assigned->value => [
                 ApplicationStatus::Processing,
             ],
             ApplicationStatus::Processing->value => [
                 ApplicationStatus::SupplementRequired,
-                ApplicationStatus::Approved,
-                ApplicationStatus::Rejected,
+                ApplicationStatus::PendingApproval,
             ],
             ApplicationStatus::SupplementRequired->value => [
+                ApplicationStatus::Processing,
+            ],
+            ApplicationStatus::PendingApproval->value => [
+                ApplicationStatus::Approved,
+                ApplicationStatus::Rejected,
                 ApplicationStatus::Processing,
             ],
             ApplicationStatus::Approved->value => [],

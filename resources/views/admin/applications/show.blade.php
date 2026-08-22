@@ -37,6 +37,12 @@
         </div>
     @endif
 
+    @if ($application->status->value === 'pending_approval')
+        <div class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+            Hồ sơ đang <span class="font-semibold">chờ quản lý duyệt</span> — Staff đã gửi kết quả/đề xuất. Quản lý có thể duyệt, từ chối hoặc trả về xử lý lại.
+        </div>
+    @endif
+
     @if ($application->status->value === 'supplement_required')
         @php
             $missingDocs = $application->missingRequiredDocuments();
@@ -216,8 +222,16 @@
                                 : ($unassigned
                                     ? 'Hồ sơ chưa có người phụ trách. Bạn có thể nhận xử lý nếu thuộc phòng ban phụ trách dịch vụ.'
                                     : 'Hồ sơ đã được gán cho cán bộ khác. Bạn không thể thao tác hồ sơ này.'),
-                            'processing' => 'Bạn đang xử lý hồ sơ. Có thể yêu cầu bổ sung tài liệu, duyệt hoặc từ chối.',
+                            'assigned' => $assignedToMe
+                                ? 'Hồ sơ đã được phân công cho bạn. Hãy bắt đầu xử lý.'
+                                : 'Hồ sơ đã được phân công cho cán bộ khác.',
+                            'processing' => $assignedToMe
+                                ? 'Bạn đang xử lý hồ sơ. Có thể yêu cầu bổ sung hoặc gửi kết quả chờ quản lý duyệt.'
+                                : 'Hồ sơ đang được cán bộ khác xử lý.',
                             'supplement_required' => 'Đang chờ công dân nộp tài liệu bổ sung. Khi đã đủ tài liệu, hãy tiếp tục xử lý.',
+                            'pending_approval' => auth()->user()?->isManager() || auth()->user()?->isSuperAdmin()
+                                ? 'Hồ sơ đang chờ bạn duyệt. Có thể duyệt, từ chối hoặc trả về xử lý lại.'
+                                : 'Hồ sơ đã gửi chờ quản lý duyệt.',
                             'approved' => 'Hồ sơ đã được duyệt và hoàn tất.',
                             'rejected' => 'Hồ sơ đã bị từ chối và hoàn tất.',
                             default => null,
@@ -248,7 +262,7 @@
                     @endcan
 
                     @can('startProcessing', $application)
-                        @if ($status === 'received' && $assignedToMe)
+                        @if (in_array($status, ['received', 'assigned'], true) && $assignedToMe)
                             <form method="POST" action="{{ route('admin.applications.start-processing', $application) }}">
                                 @csrf
                                 <x-admin.button type="submit" class="w-full">Bắt đầu xử lý</x-admin.button>
@@ -273,8 +287,24 @@
                         @endif
                     @endcan
 
-                    @can('approve', $application)
+                    @can('submitForApproval', $application)
                         @if ($status === 'processing' && $assignedToMe)
+                            <x-admin.button type="button" data-dialog-open="submit-for-approval-{{ $application->id }}" class="w-full">
+                                Gửi duyệt
+                            </x-admin.button>
+                        @endif
+                    @endcan
+
+                    @can('returnToProcessing', $application)
+                        @if ($status === 'pending_approval')
+                            <x-admin.button type="button" variant="secondary" data-dialog-open="return-application-{{ $application->id }}" class="w-full">
+                                Trả về xử lý lại
+                            </x-admin.button>
+                        @endif
+                    @endcan
+
+                    @can('approve', $application)
+                        @if ($status === 'pending_approval')
                             <x-admin.button type="button" variant="secondary" data-dialog-open="approve-application-{{ $application->id }}" class="w-full">
                                 Duyệt hồ sơ
                             </x-admin.button>
@@ -282,7 +312,7 @@
                     @endcan
 
                     @can('reject', $application)
-                        @if ($status === 'processing' && $assignedToMe)
+                        @if ($status === 'pending_approval')
                             <x-admin.button type="button" variant="danger" data-dialog-open="reject-application-{{ $application->id }}" class="w-full">
                                 Từ chối hồ sơ
                             </x-admin.button>
@@ -468,8 +498,10 @@
                     @error('staff_id')<p class="admin-field-error">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="admin-label" for="assign-note-{{ $application->id }}">Ghi chú (tùy chọn)</label>
-                    <textarea id="assign-note-{{ $application->id }}" class="admin-input" name="note" rows="2" maxlength="1000">{{ old('note') }}</textarea>
+                    <label class="admin-label" for="assign-note-{{ $application->id }}">Ghi chú / Lý do đổi người xử lý</label>
+                    <textarea id="assign-note-{{ $application->id }}" class="admin-input" name="note" rows="2" maxlength="1000" placeholder="Bắt buộc khi hồ sơ đã được nhận/đang xử lý hoặc chờ duyệt">{{ old('note') }}</textarea>
+                    @error('note')<p class="admin-field-error">{{ $message }}</p>@enderror
+                    <p class="mt-1 text-xs text-gray-500">Nếu hồ sơ chưa nhận, có thể để trống. Đã nhận/đang xử lý/chờ duyệt thì bắt buộc nhập lý do.</p>
                 </div>
                 <div class="flex justify-end gap-2 border-t border-border pt-4">
                     <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
@@ -504,8 +536,56 @@
         @endif
     @endcan
 
-    @can('approve', $application)
+    @can('submitForApproval', $application)
         @if ($application->status->value === 'processing')
+            <x-admin.dialog
+                id="submit-for-approval-{{ $application->id }}"
+                title="Gửi duyệt"
+                description="Hồ sơ sẽ chuyển sang chờ quản lý duyệt (có thể duyệt, từ chối hoặc trả về)."
+                data-open-on-error="{{ $errors->has('note') ? 'true' : 'false' }}"
+            >
+            <form method="POST" action="{{ route('admin.applications.submit-for-approval', $application) }}" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="admin-label" for="submit-note-{{ $application->id }}">Ghi chú gửi duyệt (tùy chọn)</label>
+                    <textarea id="submit-note-{{ $application->id }}" class="admin-input" name="note" rows="3" maxlength="2000">{{ old('note') }}</textarea>
+                    @error('note')<p class="admin-field-error">{{ $message }}</p>@enderror
+                </div>
+                <div class="flex justify-end gap-2 border-t border-border pt-4">
+                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                    <x-admin.button type="submit">Gửi duyệt</x-admin.button>
+                </div>
+            </form>
+        </x-admin.dialog>
+        @endif
+    @endcan
+
+    @can('returnToProcessing', $application)
+        @if ($application->status->value === 'pending_approval')
+            <x-admin.dialog
+                id="return-application-{{ $application->id }}"
+                title="Trả về xử lý lại"
+                description="Hồ sơ sẽ quay lại trạng thái đang xử lý để cán bộ tiếp tục xử lý."
+                data-open-on-error="{{ $errors->has('note') ? 'true' : 'false' }}"
+            >
+            <form method="POST" action="{{ route('admin.applications.return', $application) }}" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="admin-label" for="return-note-{{ $application->id }}">Lý do trả về</label>
+                    <textarea id="return-note-{{ $application->id }}" class="admin-input" name="note" rows="3" maxlength="2000" required>{{ old('note') }}</textarea>
+                    @error('note')<p class="admin-field-error">{{ $message }}</p>@enderror
+                </div>
+                <div class="flex justify-end gap-2 border-t border-border pt-4">
+                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                    <x-admin.button type="submit" variant="secondary">Xác nhận trả về</x-admin.button>
+                </div>
+            </form>
+        </x-admin.dialog>
+        @endif
+    @endcan
+
+    @can('approve', $application)
+        @if ($application->status->value === 'pending_approval')
             <x-admin.dialog
                 id="approve-application-{{ $application->id }}"
                 title="Duyệt hồ sơ"
@@ -529,7 +609,7 @@
     @endcan
 
     @can('reject', $application)
-        @if ($application->status->value === 'processing')
+        @if ($application->status->value === 'pending_approval')
             <x-admin.dialog
                 id="reject-application-{{ $application->id }}"
                 title="Từ chối hồ sơ"

@@ -80,6 +80,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/applications/{application}/resume', [ApplicationController::class, 'resume'])->name('applications.resume');
         Route::post('/applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
         Route::post('/applications/{application}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
+        Route::post('/applications/{application}/submit-for-approval', [ApplicationController::class, 'submitForApproval'])->name('applications.submit-for-approval');
+        Route::post('/applications/{application}/return', [ApplicationController::class, 'returnToProcessing'])->name('applications.return');
         Route::post('/applications/{application}/result-documents', [ApplicationController::class, 'storeResultDocument'])->name('applications.result-documents.store');
         Route::get('/applications/{application}/documents/{document}/download', [ApplicationController::class, 'downloadDocument'])
             ->scopeBindings()

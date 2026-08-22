@@ -45,6 +45,11 @@ class ApplicationStatusNotification extends Notification
                 'Đã tiếp nhận hồ sơ',
                 "Hồ sơ {$application->application_code} đã được tiếp nhận.",
             ],
+            ApplicationStatus::Assigned => [
+                'application.assigned',
+                'Hồ sơ đã được phân công',
+                "Hồ sơ {$application->application_code} đã được phân công cán bộ xử lý.",
+            ],
             ApplicationStatus::Processing => [
                 'application.processing',
                 'Hồ sơ đang xử lý',
@@ -54,6 +59,11 @@ class ApplicationStatusNotification extends Notification
                 'application.supplement_requested',
                 'Cần bổ sung hồ sơ',
                 "Hồ sơ {$application->application_code} cần bổ sung thông tin hoặc tài liệu.",
+            ],
+            ApplicationStatus::PendingApproval => [
+                'application.pending_approval',
+                'Hồ sơ chờ duyệt',
+                "Hồ sơ {$application->application_code} đã được cán bộ gửi chờ duyệt.",
             ],
             ApplicationStatus::Approved => [
                 'application.approved',

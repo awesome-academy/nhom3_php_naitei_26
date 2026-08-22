@@ -5,6 +5,7 @@ namespace App\Actions\Application;
 use App\Enums\ApplicationStatus;
 use App\Models\Application;
 use App\Models\ApplicationAssignment;
+use App\Models\ApplicationStatusHistory;
 use App\Models\User;
 use App\Support\Application\ApplicationActivityLogger;
 use Illuminate\Support\Facades\DB;
@@ -32,12 +33,24 @@ final readonly class AssignApplicationAction
 
             Gate::forUser($actor)->authorize('assign', $locked);
 
-            if (in_array($locked->status, [
-                ApplicationStatus::Approved,
-                ApplicationStatus::Rejected,
-            ], true)) {
+            if ($locked->status->isTerminal()) {
                 throw ValidationException::withMessages([
                     'staff_id' => 'Không thể phân công hồ sơ đã hoàn tất.',
+                ]);
+            }
+
+            // Conditional reason: if already assigned/processing, note is required
+            $hasActiveAssignment = ApplicationAssignment::query()
+                ->where('application_id', $locked->getKey())
+                ->whereNull('ended_at')
+                ->exists();
+            $requiresReason = $hasActiveAssignment
+                || $locked->assigned_staff_id !== null
+                || in_array($locked->status, [ApplicationStatus::Processing, ApplicationStatus::SupplementRequired, ApplicationStatus::PendingApproval, ApplicationStatus::Assigned], true);
+
+            if ($requiresReason && blank($note)) {
+                throw ValidationException::withMessages([
+                    'note' => 'Vui lòng nhập lý do khi đổi người xử lý hồ sơ đã được nhận/đang xử lý.',
                 ]);
             }
 
@@ -71,7 +84,22 @@ final readonly class AssignApplicationAction
             ]);
 
             $locked->assigned_staff_id = $lockedStaff->getKey();
-            $locked->save();
+
+            // Transition to Assigned if currently Received (first assignment)
+            if ($locked->status === ApplicationStatus::Received) {
+                $from = $locked->status;
+                $locked->status = ApplicationStatus::Assigned;
+                $locked->save();
+                ApplicationStatusHistory::query()->create([
+                    'application_id' => $locked->getKey(),
+                    'from_status' => $from,
+                    'to_status' => ApplicationStatus::Assigned,
+                    'changed_by' => $actor->getKey(),
+                    'note' => $note,
+                ]);
+            } else {
+                $locked->save();
+            }
 
             $this->activityLogger->recordAssignment($locked, $actor, $lockedStaff, $note);
 

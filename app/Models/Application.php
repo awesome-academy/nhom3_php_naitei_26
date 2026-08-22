@@ -294,15 +294,17 @@ class Application extends Model
 
     public function scopeAssignableTo(Builder $query, User $actor): Builder
     {
+        $terminal = ApplicationStatus::completedValues();
+
         if ($actor->isSuperAdmin()) {
-            return $query->whereNotIn('status', [ApplicationStatus::Approved, ApplicationStatus::Rejected]);
+            return $query->whereNotIn('status', $terminal);
         }
 
         if ($actor->isManager()) {
             $departmentIds = $actor->ledDepartments()->pluck('id');
 
             return $query
-                ->whereNotIn('status', [ApplicationStatus::Approved, ApplicationStatus::Rejected])
+                ->whereNotIn('status', $terminal)
                 ->whereHas(
                     'serviceType',
                     fn (Builder $serviceQuery) => $serviceQuery->whereIn('responsible_department_id', $departmentIds)
