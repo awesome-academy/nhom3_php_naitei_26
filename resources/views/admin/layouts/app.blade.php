@@ -73,6 +73,19 @@
                     </a>
                 @endcan
 
+                @can('viewAny', \App\Models\Application::class)
+                    <a
+                        href="{{ route('admin.applications.index') }}"
+                        @class([
+                            'whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                            'bg-white/20 text-white' => request()->routeIs('admin.applications.*'),
+                            'text-white/65 hover:bg-white/10 hover:text-white' => ! request()->routeIs('admin.applications.*'),
+                        ])
+                    >
+                        Hồ sơ
+                    </a>
+                @endcan
+
                 @can('viewAny', \App\Models\User::class)
                     <a
                         href="{{ route('admin.users.index') }}"

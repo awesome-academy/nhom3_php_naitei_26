@@ -768,12 +768,14 @@
                 id="preview-document-{{ $application->id }}-{{ $document->id }}"
                 title="Xem trước tài liệu"
                 description="{{ $document->original_name }}"
+                size="4xl"
             >
                 <div class="space-y-3">
                     <iframe
-                        class="h-[70vh] w-full rounded-lg border border-border bg-gray-100"
+                        class="h-[80vh] max-h-[75vh] w-full rounded-lg border border-border bg-gray-100"
                         data-src="{{ route('admin.applications.documents.download', [$application, $document]) }}?inline=1"
                         title="{{ $document->original_name }}"
+                        loading="lazy"
                     ></iframe>
                     <div class="flex justify-end gap-2 border-t border-border pt-4">
                         <x-admin.button variant="secondary" data-dialog-close>Đóng</x-admin.button>
