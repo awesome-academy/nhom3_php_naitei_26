@@ -160,7 +160,7 @@
             }">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
-                        <h3 class="text-lg font-bold text-gray-950">Biểu mẫu điện tử (Form Schema)</h3>
+                        <h3 class="text-lg font-bold text-gray-950">Biểu mẫu điện tử</h3>
                         <p class="text-sm text-gray-600">Các trường thông tin người dân cần điền thêm vào tờ khai trực tuyến.</p>
                     </div>
                     <x-admin.button type="button" variant="secondary" @click="add" class="!min-h-8 !px-3 !py-1 text-xs">

@@ -17,6 +17,9 @@ class AdminLoginTest extends TestCase
         $this->get('/admin/login')
             ->assertOk()
             ->assertViewIs('admin.auth.login')
+            ->assertSee('emblem-vietnam.svg')
+            ->assertSee('Cổng Dịch Vụ Công')
+            ->assertSee('PHỤC VỤ NGƯỜI DÂN')
             ->assertSee('Đăng nhập nội bộ');
     }
 

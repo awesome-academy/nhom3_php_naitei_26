@@ -130,6 +130,7 @@ class DepartmentCandidateController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role->value,
+            'role_label' => $user->role->label(),
         ])->values();
 
         return response()->json([

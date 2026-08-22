@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', config('app.name'))</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('emblem-vietnam.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/admin/app.js'])
 </head>
 <body class="min-h-screen bg-admin-page font-inter text-slate-900">
     <header class="bg-primary text-white shadow-sm">
         <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-2 py-2 sm:gap-x-5 sm:px-6 lg:px-8">
             <a href="{{ route('admin.dashboard') }}" class="flex shrink-0 items-center gap-3 text-white">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary shadow-sm">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </span>
-                <span class="hidden leading-tight sm:block">
-                    <span class="block text-base font-bold tracking-tight text-white">GovServices</span>
-                    <span class="block text-xs font-medium text-white/70">Internal Portal</span>
+                <img
+                    class="h-11 w-11 shrink-0 object-contain"
+                    src="{{ asset('emblem-vietnam.svg') }}"
+                    alt="Quốc huy Việt Nam"
+                >
+                <span class="hidden sm:block">
+                    <span class="block text-base font-bold leading-tight tracking-tight text-white">Cổng Dịch Vụ Công</span>
+                    <span class="mt-0.5 block text-[9px] font-semibold tracking-[0.12em] text-white/60">PHỤC VỤ NGƯỜI DÂN</span>
                 </span>
             </a>
 

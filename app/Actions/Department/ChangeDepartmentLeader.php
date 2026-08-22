@@ -36,7 +36,7 @@ final readonly class ChangeDepartmentLeader
 
                 if (! $newLeader) {
                     throw ValidationException::withMessages([
-                        'leader_id' => 'Chỉ Manager đang hoạt động mới có thể làm lãnh đạo phòng ban.',
+                        'leader_id' => 'Chỉ quản lý đang hoạt động mới có thể làm lãnh đạo phòng ban.',
                     ]);
                 }
             }

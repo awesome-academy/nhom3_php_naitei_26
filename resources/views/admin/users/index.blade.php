@@ -24,7 +24,7 @@
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_190px_190px_auto] xl:items-end">
                 <div>
                     <label class="admin-label" for="user-search">Tìm kiếm</label>
-                    <input id="user-search" class="admin-input" type="search" name="search" value="{{ $filters['search'] ?? '' }}" maxlength="100" placeholder="Tên, email hoặc mã định danh Citizen" aria-invalid="{{ $errors->has('search') ? 'true' : 'false' }}">
+                    <input id="user-search" class="admin-input" type="search" name="search" value="{{ $filters['search'] ?? '' }}" maxlength="100" placeholder="Tên, email hoặc mã định danh công dân" aria-invalid="{{ $errors->has('search') ? 'true' : 'false' }}">
                     @error('search')<p class="admin-field-error">{{ $message }}</p>@enderror
                 </div>
                 <div>

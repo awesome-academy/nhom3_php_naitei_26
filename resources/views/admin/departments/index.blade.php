@@ -23,7 +23,7 @@
             ['label' => 'Tổng phòng ban', 'value' => $stats['total'], 'class' => 'text-gray-950'],
             ['label' => 'Đang hoạt động', 'value' => $stats['active'], 'class' => 'text-emerald-700'],
             ['label' => 'Thiếu lãnh đạo hợp lệ', 'value' => $stats['missing_leader'], 'class' => 'text-amber-700'],
-            ['label' => 'Quan hệ Staff đang hoạt động', 'value' => $stats['staff_memberships'], 'class' => 'text-primary'],
+            ['label' => 'Nhân viên đang thuộc phòng ban', 'value' => $stats['staff_memberships'], 'class' => 'text-primary'],
         ] as $stat)
             <article class="admin-card">
                 <div class="admin-card-body">

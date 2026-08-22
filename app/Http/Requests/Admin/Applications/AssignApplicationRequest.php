@@ -34,7 +34,7 @@ class AssignApplicationRequest extends FormRequest
     {
         return [
             'staff_id.required' => 'Vui lòng chọn staff để phân công.',
-            'staff_id.exists' => 'Staff không tồn tại hoặc không thuộc phòng ban phụ trách dịch vụ của hồ sơ.',
+            'staff_id.exists' => 'Nhân viên không tồn tại hoặc không thuộc phòng ban phụ trách dịch vụ của hồ sơ.',
         ];
     }
 }

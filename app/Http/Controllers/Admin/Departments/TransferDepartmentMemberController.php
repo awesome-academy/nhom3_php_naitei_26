@@ -32,6 +32,6 @@ class TransferDepartmentMemberController extends Controller
 
         return redirect()
             ->route('admin.departments.show', $target)
-            ->with('success', 'Đã điều chuyển Staff sang phòng ban đích. Tài khoản và lịch sử nghiệp vụ được giữ nguyên.');
+            ->with('success', 'Đã điều chuyển nhân viên sang phòng ban đích. Tài khoản và lịch sử nghiệp vụ được giữ nguyên.');
     }
 }

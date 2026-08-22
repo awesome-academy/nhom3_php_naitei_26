@@ -71,7 +71,7 @@ final readonly class TransferDepartmentMember
                     ->find($member->getKey());
                 if (! $lockedMember) {
                     throw ValidationException::withMessages([
-                        'member' => 'Chỉ Staff đang hoạt động mới có thể được điều chuyển.',
+                        'member' => 'Chỉ nhân viên đang hoạt động mới có thể được điều chuyển.',
                     ]);
                 }
 
@@ -82,7 +82,7 @@ final readonly class TransferDepartmentMember
                     ->first();
                 if (! $sourceMembership) {
                     throw ValidationException::withMessages([
-                        'member' => 'Staff không còn thuộc phòng ban nguồn. Vui lòng tải lại trang.',
+                        'member' => 'Nhân viên không còn thuộc phòng ban nguồn. Vui lòng tải lại trang.',
                     ]);
                 }
 

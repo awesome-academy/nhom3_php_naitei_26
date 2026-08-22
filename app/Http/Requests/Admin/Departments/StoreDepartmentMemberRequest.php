@@ -53,7 +53,7 @@ class StoreDepartmentMemberRequest extends FormRequest
         return [
             'user_id.required' => 'Vui lòng chọn thành viên.',
             'user_id.integer' => 'Thành viên được chọn không hợp lệ.',
-            'user_id.exists' => 'Chỉ Staff hoặc Manager đang hoạt động và phù hợp phạm vi mới có thể được thêm.',
+            'user_id.exists' => 'Chỉ nhân viên hoặc quản lý đang hoạt động và phù hợp phạm vi mới có thể được thêm.',
             'version.required' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',
             'version.integer' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',
             'version.min' => 'Phiên bản dữ liệu không hợp lệ. Vui lòng tải lại trang.',

@@ -38,7 +38,7 @@
 
     @if ($department->leader_id && ! $department->hasEligibleLeader())
         <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
-            Lãnh đạo hiện tại không còn đủ điều kiện hoạt động. Tham chiếu vẫn được giữ để tra cứu và cần được Super Admin cập nhật.
+            Lãnh đạo hiện tại không còn đủ điều kiện hoạt động. Tham chiếu vẫn được giữ để tra cứu và cần được quản trị viên cấp cao cập nhật.
         </div>
     @endif
 
@@ -58,7 +58,7 @@
                                 <span class="font-semibold">{{ $department->leader->name }}</span>
                                 <span class="block text-xs text-gray-500">{{ $department->leader->email }}</span>
                                 <x-admin.badge class="mt-2" :variant="$department->hasEligibleLeader() ? 'success' : 'warning'">
-                                    {{ $department->hasEligibleLeader() ? 'Manager đang hoạt động' : 'Không còn đủ điều kiện' }}
+                                    {{ $department->hasEligibleLeader() ? 'Quản lý đang hoạt động' : 'Không còn đủ điều kiện' }}
                                 </x-admin.badge>
                             @else
                                 <x-admin.badge variant="warning">Chưa có lãnh đạo</x-admin.badge>
@@ -120,7 +120,7 @@
                                         </td>
                                         <td>
                                             <x-admin.badge :variant="$member->isManager() ? 'manager' : 'staff'">
-                                                {{ $member->isManager() ? 'Manager' : 'Staff' }}
+                                                {{ $member->isManager() ? 'Quản lý' : 'Nhân viên' }}
                                             </x-admin.badge>
                                         </td>
                                         <td class="text-right">
@@ -157,7 +157,7 @@
         <x-admin.dialog
             id="change-department-leader"
             title="Thay đổi lãnh đạo"
-            description="Chỉ Manager đang hoạt động mới có thể được chọn. Lãnh đạo mới sẽ tự động trở thành thành viên."
+            description="Chỉ quản lý đang hoạt động mới có thể được chọn. Lãnh đạo mới sẽ tự động trở thành thành viên."
             data-open-on-error="{{ $errors->has('leader_id') ? 'true' : 'false' }}"
         >
             <form
@@ -171,6 +171,7 @@
                         'name' => $department->leader->name,
                         'email' => $department->leader->email,
                         'role' => $department->leader->role->value,
+                        'role_label' => $department->leader->role->label(),
                     ] : null),
                 })"
                 @click.outside="close()"
@@ -181,7 +182,7 @@
                 <input type="hidden" name="leader_id" :value="selected?.id ?? ''">
 
                 <div>
-                    <label class="admin-label" for="leader-candidate-search">Manager lãnh đạo</label>
+                    <label class="admin-label" for="leader-candidate-search">Quản lý phụ trách</label>
                     <input
                         id="leader-candidate-search"
                         class="admin-input"
@@ -253,7 +254,7 @@
         <x-admin.dialog
             id="add-department-member"
             title="Thêm thành viên"
-            description="Tìm tài khoản nội bộ phù hợp. Manager chỉ có thể thêm Staff."
+            description="Tìm tài khoản nội bộ phù hợp. Quản lý chỉ có thể thêm nhân viên."
             data-open-on-error="{{ $errors->has('user_id') ? 'true' : 'false' }}"
         >
             <form
@@ -267,7 +268,7 @@
                 <input type="hidden" name="version" value="{{ $department->lock_version }}">
                 <input type="hidden" name="user_id" :value="selected?.id ?? ''">
                 <div>
-                    <label class="admin-label" for="member-candidate-search">Staff hoặc Manager</label>
+                    <label class="admin-label" for="member-candidate-search">Nhân viên hoặc quản lý</label>
                     <input
                         id="member-candidate-search"
                         class="admin-input"
@@ -291,7 +292,7 @@
                         <template x-for="(item, index) in items" :key="item.id">
                             <button type="button" class="block w-full rounded-lg px-3 py-2 text-left hover:bg-blue-50" :class="activeIndex === index ? 'bg-blue-50' : ''" role="option" @mousedown.prevent="select(item)">
                                 <span class="block text-sm font-semibold" x-text="item.name"></span>
-                                <span class="block text-xs text-gray-500" x-text="`${item.email} · ${item.role}`"></span>
+                                <span class="block text-xs text-gray-500" x-text="`${item.email} · ${item.role_label}`"></span>
                             </button>
                         </template>
                     </div>
@@ -311,8 +312,8 @@
                 @if ($member->isStaff() && $member->canAccessProtectedResources())
                     <x-admin.dialog
                         id="transfer-member-{{ $member->id }}"
-                        title="Điều chuyển Staff"
-                        description="Staff sẽ được thêm vào phòng ban đích và gỡ khỏi phòng ban nguồn trong cùng một thao tác nguyên tử. Tài khoản và lịch sử nghiệp vụ không bị thay đổi."
+                        title="Điều chuyển nhân viên"
+                        description="Nhân viên sẽ được thêm vào phòng ban đích và gỡ khỏi phòng ban nguồn trong cùng một thao tác nguyên tử. Tài khoản và lịch sử nghiệp vụ không bị thay đổi."
                         data-open-on-error="{{ $errors->hasAny(['target_department_id', 'source_version', 'target_version', 'member']) && (string) old('transfer_member_id') === (string) $member->id ? 'true' : 'false' }}"
                     >
                         <form
@@ -331,7 +332,7 @@
 
                             <dl class="grid gap-3 rounded-xl bg-gray-50 p-3 text-sm sm:grid-cols-2">
                                 <div>
-                                    <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">Staff</dt>
+                                    <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">Nhân viên</dt>
                                     <dd class="mt-1 font-semibold text-gray-950">{{ $member->name }}</dd>
                                     <dd class="text-xs text-gray-500">{{ $member->email }}</dd>
                                 </div>

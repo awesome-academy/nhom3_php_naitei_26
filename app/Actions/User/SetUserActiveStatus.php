@@ -48,7 +48,7 @@ final readonly class SetUserActiveStatus
                 'action' => $desiredActive ? 'user.activated' : 'user.deactivated',
                 'subject_type' => $freshTarget->getMorphClass(),
                 'subject_id' => $freshTarget->getKey(),
-                'description' => $desiredActive ? 'User account activated.' : 'User account deactivated.',
+                'description' => $desiredActive ? 'Đã kích hoạt tài khoản người dùng.' : 'Đã vô hiệu hóa tài khoản người dùng.',
                 'metadata' => [
                     'actor' => $this->snapshot($freshActor),
                     'subject' => $after,
@@ -102,7 +102,7 @@ final readonly class SetUserActiveStatus
     private function guardDeactivation(User $actor, User $target, Collection $activeSuperAdmins): void
     {
         if ($target->isSuperAdmin() && $activeSuperAdmins->count() <= 1) {
-            $this->fail('Không thể vô hiệu hóa Super Admin đang hoạt động cuối cùng.');
+            $this->fail('Không thể vô hiệu hóa quản trị viên cấp cao đang hoạt động cuối cùng.');
         }
 
         if ($actor->is($target)) {
@@ -110,7 +110,7 @@ final readonly class SetUserActiveStatus
         }
 
         if ($target->isManager() && Department::query()->where('leader_id', $target->getKey())->exists()) {
-            $this->fail('Không thể vô hiệu hóa Manager đang lãnh đạo một phòng ban hoạt động.');
+            $this->fail('Không thể vô hiệu hóa quản lý đang lãnh đạo một phòng ban hoạt động.');
         }
 
         if (($target->isStaff() || $target->isManager()) && Application::query()
