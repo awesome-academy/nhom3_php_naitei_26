@@ -15,6 +15,7 @@ use App\Policies\ServiceCategoryPolicy;
 use App\Policies\ServiceTypePolicy;
 use App\Policies\UserPolicy;
 use Dedoc\Scramble\Scramble;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -47,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
 
             return $user !== null && in_array($user->role->value, ['manager', 'super_admin'], true);
         });
+
+        Paginator::defaultView('vendor.pagination.tailwind');
 
         if (class_exists(Scramble::class)) {
             Scramble::registerUiRoute('docs/api');

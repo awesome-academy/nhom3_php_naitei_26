@@ -9,7 +9,7 @@
     id="{{ $id }}"
     aria-labelledby="{{ $id }}-title"
     @if ($description) aria-describedby="{{ $id }}-description" @endif
-    {{ $attributes->class('m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-border bg-white p-0 text-gray-900 shadow-xl backdrop:bg-slate-950/50') }}
+    {{ $attributes->class('m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-border bg-white p-0 text-left text-gray-900 shadow-xl backdrop:bg-slate-950/50 whitespace-normal') }}
 >
     <div class="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
         <div>

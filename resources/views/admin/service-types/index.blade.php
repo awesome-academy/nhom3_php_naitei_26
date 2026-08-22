@@ -10,9 +10,11 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => 'services'], request()->query()))">
-                Xuất CSV
-            </x-admin.button>
+            @if (auth()->user()?->isSuperAdmin())
+                <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => 'services'], request()->query()))">
+                    Xuất CSV
+                </x-admin.button>
+            @endif
             @can('create', \App\Models\ServiceType::class)
                 <x-admin.button :href="route('admin.service-types.create')">Tạo dịch vụ</x-admin.button>
             @endcan
@@ -20,99 +22,168 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-5 rounded-xl border border-border bg-white p-4">
-        <form action="{{ route('admin.service-types.index') }}" method="GET" class="flex flex-wrap items-end gap-4">
-            <div class="w-full sm:w-64">
-                <label for="search" class="mb-1.5 block text-sm font-medium text-gray-700">Tìm kiếm</label>
-                <input type="text" name="search" id="search" value="{{ request('search') }}" class="admin-input" placeholder="Mã hoặc Tên dịch vụ...">
-            </div>
-            
-            <div class="w-full sm:w-64">
-                <label for="category" class="mb-1.5 block text-sm font-medium text-gray-700">Danh mục</label>
-                <select name="category" id="category" class="admin-select">
-                    <option value="">Tất cả danh mục</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}" @selected(request('category') == $cat->id)>{{ $cat->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+    <section class="admin-card mb-5" aria-labelledby="service-filter-title">
+        <h2 id="service-filter-title" class="sr-only">Bộ lọc dịch vụ công</h2>
+        <form action="{{ route('admin.service-types.index') }}" method="GET" class="p-4 sm:p-5">
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(240px,1fr)_220px_180px_auto] xl:items-end">
+                <div>
+                    <label for="service-search" class="admin-label">Tìm kiếm</label>
+                    <input type="search" name="search" id="service-search" value="{{ request('search') }}" class="admin-input" placeholder="Mã hoặc tên dịch vụ...">
+                </div>
+                
+                <div>
+                    <label for="service-category" class="admin-label">Danh mục</label>
+                    <select name="category" id="service-category" class="admin-select">
+                        <option value="">Tất cả danh mục</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" @selected((string) request('category') === (string) $cat->id)>{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <div>
-                <x-admin.button type="submit">Lọc</x-admin.button>
-                @if(request()->hasAny(['search', 'category']))
-                    <x-admin.button variant="ghost" :href="route('admin.service-types.index')" class="ml-2">Xóa lọc</x-admin.button>
-                @endif
+                <div>
+                    <label for="service-status" class="admin-label">Trạng thái</label>
+                    <select name="status" id="service-status" class="admin-select">
+                        <option value="active" @selected(($status ?? 'active') === 'active')>Đang hoạt động</option>
+                        <option value="archived" @selected(($status ?? '') === 'archived')>Đã lưu trữ</option>
+                        <option value="all" @selected(($status ?? '') === 'all')>Tất cả</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <x-admin.button type="submit">Áp dụng</x-admin.button>
+                    @if($hasFilters ?? false)
+                        <x-admin.button variant="secondary" :href="route('admin.service-types.index')">Xóa bộ lọc</x-admin.button>
+                    @endif
+                </div>
             </div>
         </form>
-    </div>
+    </section>
 
-    @if ($serviceTypes->isEmpty())
-        <section class="admin-card" aria-labelledby="empty-services-title">
-            <div class="admin-card-body py-12 text-center">
-                <h2 id="empty-services-title" class="text-lg font-bold text-gray-950">Chưa có dịch vụ nào</h2>
-                <p class="mx-auto mt-2 max-w-lg text-sm text-gray-600">
-                    Dịch vụ được tạo sẽ hiển thị tại đây.
-                </p>
-                @can('create', \App\Models\ServiceType::class)
-                    <x-admin.button class="mt-5" :href="route('admin.service-types.create')">Tạo dịch vụ đầu tiên</x-admin.button>
-                @endcan
+    <section class="admin-card" aria-labelledby="service-results-title">
+        <h2 id="service-results-title" class="sr-only">Kết quả tra cứu dịch vụ</h2>
+
+        @if ($serviceTypes->isEmpty())
+            <div class="px-5 py-12 text-center">
+                @if ($hasFilters ?? false)
+                    <h3 class="text-lg font-bold text-gray-950">Không có kết quả phù hợp</h3>
+                    <p class="mx-auto mt-2 max-w-lg text-sm text-gray-600">Thử thay đổi từ khóa, danh mục hoặc trạng thái đang lọc.</p>
+                    <x-admin.button class="mt-5" variant="secondary" :href="route('admin.service-types.index')">Xóa bộ lọc</x-admin.button>
+                @else
+                    <h3 class="text-lg font-bold text-gray-950">Chưa có dịch vụ nào</h3>
+                    <p class="mx-auto mt-2 max-w-lg text-sm text-gray-600">
+                        Dịch vụ được tạo sẽ hiển thị tại đây.
+                    </p>
+                    @can('create', \App\Models\ServiceType::class)
+                        <x-admin.button class="mt-5" :href="route('admin.service-types.create')">Tạo dịch vụ đầu tiên</x-admin.button>
+                    @endcan
+                @endif
             </div>
-        </section>
-    @else
-        <div class="admin-table-wrap">
-            <table class="admin-table">
-                <caption class="sr-only">Danh sách dịch vụ</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Mã</th>
-                        <th scope="col">Tên dịch vụ</th>
-                        <th scope="col">Danh mục</th>
-                        <th scope="col">Phòng ban</th>
-                        <th scope="col">Phí</th>
-                        <th scope="col">Trạng thái</th>
-                        <th scope="col"><span class="sr-only">Thao tác</span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($serviceTypes as $service)
+        @else
+            <div class="admin-table-wrap rounded-none border-x-0 border-t-0" tabindex="0" aria-label="Bảng dịch vụ công có thể cuộn ngang">
+                <table class="admin-table w-full min-w-[760px]">
+                    <caption class="sr-only">Danh sách dịch vụ</caption>
+                    <thead>
                         <tr>
-                            <td class="whitespace-nowrap font-mono font-semibold text-primary">{{ $service->code }}</td>
-                            <td>
-                                <p class="font-semibold text-gray-950">{{ $service->name }}</p>
-                            </td>
-                            <td>{{ $service->category->name }}</td>
-                            <td>{{ $service->responsibleDepartment?->name ?: 'Chưa phân công' }}</td>
-                            <td class="whitespace-nowrap">{{ number_format($service->fee) }} đ</td>
-                            <td>
-                                @if($service->is_active)
-                                    <x-admin.badge variant="success">Hoạt động</x-admin.badge>
-                                @else
-                                    <x-admin.badge variant="warning">Tạm ngưng</x-admin.badge>
-                                @endif
-                            </td>
-                            <td class="whitespace-nowrap">
-                                <div class="flex justify-end gap-2">
-                                    <x-admin.button variant="ghost" :href="route('admin.service-types.show', $service)">Chi tiết</x-admin.button>
-                                    @can('update', $service)
-                                        <x-admin.button variant="secondary" :href="route('admin.service-types.edit', $service)">Sửa</x-admin.button>
-                                    @endcan
-                                    @can('delete', $service)
-                                        <form method="POST" action="{{ route('admin.service-types.destroy', $service) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa dịch vụ này?');" class="inline-block">
-                                            @csrf
-                                            @method('DELETE')
-                                            <x-admin.button type="submit" variant="secondary" class="!text-danger">Xóa</x-admin.button>
-                                        </form>
-                                    @endcan
-                                </div>
-                            </td>
+                            <th scope="col">Dịch vụ công</th>
+                            <th scope="col">Danh mục</th>
+                            <th scope="col">Phòng ban phụ trách</th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col" aria-label="Thao tác"></th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach ($serviceTypes as $service)
+                            <tr>
+                                <td>
+                                    <p class="font-semibold text-gray-950">{{ $service->name }}</p>
+                                    <p class="mt-0.5 font-mono text-xs font-semibold text-primary">{{ $service->code }}</p>
+                                </td>
+                                <td>{{ $service->category?->name ?? 'Không xác định' }}</td>
+                                <td>{{ $service->responsibleDepartment?->name ?: 'Chưa phân công' }}</td>
+                                <td>
+                                    @if($service->isArchived())
+                                        <x-admin.badge variant="neutral">Đã lưu trữ</x-admin.badge>
+                                    @elseif($service->is_active)
+                                        <x-admin.badge variant="success">Hoạt động</x-admin.badge>
+                                    @else
+                                        <x-admin.badge variant="warning">Tạm ngưng</x-admin.badge>
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap">
+                                    <div class="flex justify-end gap-2">
+                                        <x-admin.button variant="ghost" :href="route('admin.service-types.show', $service)">Chi tiết</x-admin.button>
+                                        @if (!$service->isArchived())
+                                            @can('update', $service)
+                                                <x-admin.button variant="secondary" :href="route('admin.service-types.edit', $service)">Sửa</x-admin.button>
+                                            @endcan
+                                            @can('delete', $service)
+                                                <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-service-{{ $service->id }}">Lưu trữ</x-admin.button>
+                                            @endcan
+                                        @else
+                                            @can('restore', $service)
+                                                <x-admin.button variant="secondary" class="!text-primary" data-dialog-open="restore-service-{{ $service->id }}">Hoàn tác</x-admin.button>
+                                            @endcan
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-        @if ($serviceTypes->hasPages())
-            <div class="mt-5">{{ $serviceTypes->links() }}</div>
+            <div class="border-t border-border px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-sm text-gray-600">
+                    Hiển thị {{ number_format($serviceTypes->firstItem() ?? 0) }}–{{ number_format($serviceTypes->lastItem() ?? 0) }} trong {{ number_format($serviceTypes->total()) }} kết quả
+                </p>
+                @if ($serviceTypes->hasPages())
+                    {{ $serviceTypes->onEachSide(1)->links() }}
+                @endif
+            </div>
         @endif
-    @endif
+    </section>
+
+    @foreach ($serviceTypes as $service)
+        @if (!$service->isArchived())
+            @can('delete', $service)
+                <x-admin.dialog
+                    id="archive-service-{{ $service->id }}"
+                    title="Lưu trữ dịch vụ công"
+                    description="Dịch vụ sẽ bị ẩn khỏi danh sách cho công dân nộp hồ sơ mới. Toàn bộ hồ sơ cũ liên quan vẫn được bảo toàn."
+                >
+                    <form method="POST" action="{{ route('admin.service-types.destroy', $service) }}" class="space-y-4">
+                        @csrf
+                        @method('DELETE')
+                        <p class="text-sm text-gray-700">
+                            Bạn có chắc chắn muốn lưu trữ dịch vụ <strong>{{ $service->name }}</strong>? Đây không phải thao tác xóa vĩnh viễn.
+                        </p>
+                        <div class="flex justify-end gap-2 border-t border-border pt-4">
+                            <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                            <x-admin.button type="submit" variant="danger">Xác nhận lưu trữ</x-admin.button>
+                        </div>
+                    </form>
+                </x-admin.dialog>
+            @endcan
+        @else
+            @can('restore', $service)
+                <x-admin.dialog
+                    id="restore-service-{{ $service->id }}"
+                    title="Khôi phục dịch vụ công"
+                    description="Dịch vụ sẽ được khôi phục về trạng thái hoạt động."
+                >
+                    <form method="POST" action="{{ route('admin.service-types.restore', $service) }}" class="space-y-4">
+                        @csrf
+                        <p class="text-sm text-gray-700">
+                            Bạn có chắc chắn muốn khôi phục dịch vụ <strong>{{ $service->name }}</strong>?
+                        </p>
+                        <div class="flex justify-end gap-2 border-t border-border pt-4">
+                            <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                            <x-admin.button type="submit">Xác nhận hoàn tác</x-admin.button>
+                        </div>
+                    </form>
+                </x-admin.dialog>
+            @endcan
+        @endif
+    @endforeach
 @endsection

@@ -209,4 +209,52 @@ class ServiceCatalogManagementTest extends TestCase
 
         $this->assertDatabaseMissing('service_types', ['code' => 'INV01']);
     }
+
+    public function test_admin_can_archive_and_restore_service_category(): void
+    {
+        $superAdmin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $category = ServiceCategory::factory()->create(['name' => 'Category To Archive']);
+
+        // Archive
+        $response = $this->actingAs($superAdmin)->delete(route('admin.service-categories.destroy', $category));
+        $response->assertRedirect(route('admin.service-categories.index'));
+        $this->assertSoftDeleted('service_categories', ['id' => $category->id]);
+
+        // Default index (active) should not show archived category
+        $indexResponse = $this->actingAs($superAdmin)->get(route('admin.service-categories.index'));
+        $indexResponse->assertOk()->assertDontSee('Category To Archive');
+
+        // Archived filter should show archived category
+        $archivedResponse = $this->actingAs($superAdmin)->get(route('admin.service-categories.index', ['status' => 'archived']));
+        $archivedResponse->assertOk()->assertSee('Category To Archive');
+
+        // Restore
+        $restoreResponse = $this->actingAs($superAdmin)->post(route('admin.service-categories.restore', $category));
+        $restoreResponse->assertRedirect(route('admin.service-categories.index', ['status' => 'archived']));
+        $this->assertNotSoftDeleted('service_categories', ['id' => $category->id]);
+    }
+
+    public function test_admin_can_archive_and_restore_service_type(): void
+    {
+        $superAdmin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $serviceType = ServiceType::factory()->create(['name' => 'Service To Archive']);
+
+        // Archive
+        $response = $this->actingAs($superAdmin)->delete(route('admin.service-types.destroy', $serviceType));
+        $response->assertRedirect(route('admin.service-types.index'));
+        $this->assertSoftDeleted('service_types', ['id' => $serviceType->id]);
+
+        // Default index (active) should not show archived service
+        $indexResponse = $this->actingAs($superAdmin)->get(route('admin.service-types.index'));
+        $indexResponse->assertOk()->assertDontSee('Service To Archive');
+
+        // Archived filter should show archived service
+        $archivedResponse = $this->actingAs($superAdmin)->get(route('admin.service-types.index', ['status' => 'archived']));
+        $archivedResponse->assertOk()->assertSee('Service To Archive');
+
+        // Restore
+        $restoreResponse = $this->actingAs($superAdmin)->post(route('admin.service-types.restore', $serviceType));
+        $restoreResponse->assertRedirect(route('admin.service-types.index', ['status' => 'archived']));
+        $this->assertNotSoftDeleted('service_types', ['id' => $serviceType->id]);
+    }
 }

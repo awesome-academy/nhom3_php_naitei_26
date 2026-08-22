@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -161,8 +162,19 @@ class DepartmentController extends Controller
         );
 
         return redirect()
-            ->route('admin.departments.index')
+            ->back(fallback: route('admin.departments.index'))
             ->with('success', 'Đã lưu trữ phòng ban. Thành viên, dịch vụ và lịch sử nghiệp vụ vẫn được giữ nguyên.');
+    }
+
+    public function restore(Request $request, Department $department): RedirectResponse
+    {
+        $this->authorize('restore', $department);
+
+        $department->restore();
+
+        return redirect()
+            ->back(fallback: route('admin.departments.index'))
+            ->with('success', 'Đã hoàn tác và khôi phục phòng ban thành công.');
     }
 
     /** @return array{total: int, active: int, missing_leader: int, staff_memberships: int} */

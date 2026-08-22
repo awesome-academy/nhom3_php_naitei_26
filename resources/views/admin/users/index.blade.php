@@ -8,14 +8,16 @@
             <h1 class="text-2xl font-bold text-gray-950">Người dùng</h1>
             <p class="mt-1 text-sm text-gray-600">Tra cứu tài khoản và trạng thái truy cập. Vai trò, hồ sơ định danh và cơ cấu tổ chức được quản lý bởi feature tương ứng.</p>
         </div>
-        <div class="flex flex-shrink-0 flex-wrap items-center gap-2">
-            <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => request('role') === 'staff' || request('role') === 'manager' ? 'staff' : 'citizens'], request()->query()))">
-                Xuất CSV
-            </x-admin.button>
-            <x-admin.button :href="route('admin.users.import')">
-                Nhập dữ liệu CSV
-            </x-admin.button>
-        </div>
+        @if (auth()->user()?->isSuperAdmin())
+            <div class="flex flex-shrink-0 flex-wrap items-center gap-2">
+                <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => request('role') === 'staff' || request('role') === 'manager' ? 'staff' : 'citizens'], request()->query()))">
+                    Xuất CSV
+                </x-admin.button>
+                <x-admin.button :href="route('admin.users.import')">
+                    Nhập dữ liệu CSV
+                </x-admin.button>
+            </div>
+        @endif
     </div>
 
     <section class="admin-card" aria-labelledby="user-results-title">
@@ -115,8 +117,8 @@
                 @endforeach
             </div>
 
-            <div class="border-t border-border px-4 py-4 sm:px-5">
-                <p class="mb-3 text-sm text-gray-600">Hiển thị {{ number_format($users->firstItem()) }}–{{ number_format($users->lastItem()) }} trong {{ number_format($users->total()) }} kết quả</p>
+            <div class="border-t border-border px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-sm text-gray-600">Hiển thị {{ number_format($users->firstItem() ?? 0) }}–{{ number_format($users->lastItem() ?? 0) }} trong {{ number_format($users->total()) }} kết quả</p>
                 @if ($users->hasPages()){{ $users->onEachSide(1)->links() }}@endif
             </div>
         @endif

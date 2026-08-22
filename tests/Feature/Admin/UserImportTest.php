@@ -29,6 +29,24 @@ class UserImportTest extends TestCase
         $response->assertForbidden();
     }
 
+    public function test_staff_cannot_access_import_page(): void
+    {
+        $staff = User::factory()->withRole(UserRole::Staff)->create();
+
+        $response = $this->actingAs($staff)->get('/admin/users/import');
+
+        $response->assertForbidden();
+    }
+
+    public function test_manager_cannot_access_import_page(): void
+    {
+        $manager = User::factory()->withRole(UserRole::Manager)->create();
+
+        $response = $this->actingAs($manager)->get('/admin/users/import');
+
+        $response->assertForbidden();
+    }
+
     public function test_admin_can_view_import_page(): void
     {
         $admin = User::factory()->withRole(UserRole::SuperAdmin)->create();

@@ -8,11 +8,13 @@
             <h1 class="text-2xl font-bold text-gray-950">Hồ sơ dịch vụ công</h1>
             <p class="mt-1 text-sm text-gray-600">Tra cứu hồ sơ trong đúng phạm vi trách nhiệm của bạn.</p>
         </div>
-        <div>
-            <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => 'applications'], request()->query()))">
-                Xuất CSV
-            </x-admin.button>
-        </div>
+        @if (auth()->user()?->isSuperAdmin())
+            <div>
+                <x-admin.button variant="secondary" :href="route('admin.export', array_merge(['resource' => 'applications'], request()->query()))">
+                    Xuất CSV
+                </x-admin.button>
+            </div>
+        @endif
     </div>
 
     @isset($stats)
@@ -258,9 +260,9 @@
                 </table>
             </div>
 
-            <div class="px-4 py-4 sm:px-5">
-                <p class="mb-3 text-sm text-gray-600">
-                    Hiển thị {{ number_format($applications->firstItem()) }}–{{ number_format($applications->lastItem()) }} trong {{ number_format($applications->total()) }} kết quả
+            <div class="border-t border-border px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-sm text-gray-600">
+                    Hiển thị {{ number_format($applications->firstItem() ?? 0) }}–{{ number_format($applications->lastItem() ?? 0) }} trong {{ number_format($applications->total()) }} kết quả
                 </p>
                 @if ($applications->hasPages())
                     {{ $applications->onEachSide(1)->links() }}

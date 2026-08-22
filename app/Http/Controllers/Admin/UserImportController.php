@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Services\CsvImportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
@@ -20,8 +21,10 @@ class UserImportController extends Controller
     /**
      * Display the user import page with instructions and reports.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
+        abort_unless($request->user()?->isSuperAdmin(), 403, 'Chỉ Super Admin có quyền truy cập chức năng Nhập CSV.');
+
         $departments = Department::query()->orderBy('name')->get();
 
         // Retrieve report from cache if a key was flashed (avoid cookie size limit)

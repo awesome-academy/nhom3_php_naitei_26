@@ -11,7 +11,7 @@ class CsvImportRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user !== null && $user->canAccessProtectedResources() && ($user->isSuperAdmin() || $user->isManager() || $user->isStaff());
+        return $user !== null && $user->canAccessProtectedResources() && $user->isSuperAdmin();
     }
 
     /**

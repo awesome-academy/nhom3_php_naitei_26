@@ -56,9 +56,17 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::delete('/departments/{department}/members/{member}', [DepartmentMemberController::class, 'destroy'])
             ->scopeBindings()
             ->name('departments.members.destroy');
+        Route::post('/departments/{department}/restore', [DepartmentController::class, 'restore'])
+            ->name('departments.restore');
         Route::resource('departments', DepartmentController::class)
             ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+
+        Route::post('/service-categories/{service_category}/restore', [ServiceCategoryController::class, 'restore'])
+            ->name('service-categories.restore');
         Route::resource('service-categories', ServiceCategoryController::class);
+
+        Route::post('/service-types/{service_type}/restore', [ServiceTypeController::class, 'restore'])
+            ->name('service-types.restore');
         Route::resource('service-types', ServiceTypeController::class);
 
         // User Import & Data Export routes

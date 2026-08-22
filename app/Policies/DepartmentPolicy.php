@@ -84,9 +84,21 @@ class DepartmentPolicy
             : Response::denyAsNotFound();
     }
 
-    public function restore(User $user, Department $department): bool
+    public function restore(User $user, Department $department): Response
     {
-        return false;
+        if (! $user->canAccessProtectedResources()) {
+            return Response::denyAsNotFound();
+        }
+
+        if (! $user->isSuperAdmin()) {
+            return $this->canView($user, $department)
+                ? Response::deny('Chỉ Super Admin có thể khôi phục phòng ban.')
+                : Response::denyAsNotFound();
+        }
+
+        return $department->isArchived()
+            ? Response::allow()
+            : Response::deny('Phòng ban đang hoạt động không cần khôi phục.');
     }
 
     public function forceDelete(User $user, Department $department): bool

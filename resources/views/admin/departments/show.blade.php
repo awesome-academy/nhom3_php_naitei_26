@@ -24,9 +24,15 @@
             @can('update', $department)
                 <x-admin.button variant="secondary" :href="route('admin.departments.edit', $department)">Sửa</x-admin.button>
             @endcan
-            @can('archive', $department)
-                <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-department">Xóa</x-admin.button>
-            @endcan
+            @if ($department->isActive())
+                @can('archive', $department)
+                    <x-admin.button variant="secondary" class="!text-danger" data-dialog-open="archive-department">Lưu trữ</x-admin.button>
+                @endcan
+            @else
+                @can('restore', $department)
+                    <x-admin.button variant="secondary" class="!text-primary" data-dialog-open="restore-department">Hoàn tác</x-admin.button>
+                @endcan
+            @endif
         </div>
     </div>
 
@@ -231,6 +237,25 @@
                 <div class="flex justify-end gap-2 border-t border-border pt-4">
                     <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
                     <x-admin.button type="submit" variant="danger">Xác nhận lưu trữ</x-admin.button>
+                </div>
+            </form>
+        </x-admin.dialog>
+    @endcan
+
+    @can('restore', $department)
+        <x-admin.dialog
+            id="restore-department"
+            title="Khôi phục phòng ban"
+            description="Phòng ban sẽ được chuyển về trạng thái đang hoạt động và xuất hiện lại trong các danh sách chọn."
+        >
+            <form method="POST" action="{{ route('admin.departments.restore', $department) }}" class="space-y-4">
+                @csrf
+                <p class="text-sm text-gray-700">
+                    Bạn có chắc chắn muốn khôi phục hoạt động cho phòng ban <strong>{{ $department->name }}</strong>?
+                </p>
+                <div class="flex justify-end gap-2 border-t border-border pt-4">
+                    <x-admin.button type="button" variant="secondary" data-dialog-close>Hủy</x-admin.button>
+                    <x-admin.button type="submit">Xác nhận hoàn tác</x-admin.button>
                 </div>
             </form>
         </x-admin.dialog>

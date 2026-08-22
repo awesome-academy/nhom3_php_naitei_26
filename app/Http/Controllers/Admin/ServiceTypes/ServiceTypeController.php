@@ -20,8 +20,15 @@ class ServiceTypeController extends Controller
     {
         $this->authorize('viewAny', ServiceType::class);
 
-        $query = ServiceType::query()
+        $status = $request->input('status', 'active');
+        $query = ServiceType::withTrashed()
             ->with(['category', 'responsibleDepartment']);
+
+        if ($status === 'active') {
+            $query->whereNull('deleted_at');
+        } elseif ($status === 'archived') {
+            $query->whereNotNull('deleted_at');
+        }
 
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
@@ -40,8 +47,9 @@ class ServiceTypeController extends Controller
             ->withQueryString();
 
         $categories = ServiceCategory::orderBy('name')->get();
+        $hasFilters = $request->filled('search') || $request->filled('category') || $status !== 'active';
 
-        return view('admin.service-types.index', compact('serviceTypes', 'categories'));
+        return view('admin.service-types.index', compact('serviceTypes', 'categories', 'status', 'hasFilters'));
     }
 
     public function create(): View
@@ -105,7 +113,18 @@ class ServiceTypeController extends Controller
         $serviceType->delete();
 
         return redirect()
-            ->route('admin.service-types.index')
-            ->with('success', 'Đã xóa dịch vụ.');
+            ->back(fallback: route('admin.service-types.index'))
+            ->with('success', 'Đã lưu trữ dịch vụ thành công.');
+    }
+
+    public function restore(Request $request, ServiceType $serviceType): RedirectResponse
+    {
+        $this->authorize('restore', $serviceType);
+
+        $serviceType->restore();
+
+        return redirect()
+            ->back(fallback: route('admin.service-types.index'))
+            ->with('success', 'Đã hoàn tác và khôi phục dịch vụ thành công.');
     }
 }
